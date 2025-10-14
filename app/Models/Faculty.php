@@ -59,11 +59,11 @@ class Faculty extends Model
     public function getSatisfactionStats()
     {
         $responses = $this->responses()->with('answers')->where('is_completed', true)->get();
-        
+
         if ($responses->isEmpty()) {
             return [
                 'total_responses' => 0,
-                'average_rating' => 0,
+                'average_satisfaction' => 0,
                 'satisfaction_level' => 'Belum ada data'
             ];
         }
@@ -82,7 +82,7 @@ class Faculty extends Model
 
         return [
             'total_responses' => $responses->count(),
-            'average_rating' => round($averageRating, 2),
+            'average_satisfaction' => round($averageRating * 20, 1), // Convert to percentage
             'satisfaction_level' => $this->getSatisfactionLevel($averageRating)
         ];
     }

@@ -15,6 +15,7 @@ class Questionnaire extends Model
 
     protected $fillable = [
         'faculty_id',
+        'sub_category_id',
         'title',
         'description',
         'instructions',
@@ -33,6 +34,11 @@ class Questionnaire extends Model
     public function faculty(): BelongsTo
     {
         return $this->belongsTo(Faculty::class);
+    }
+
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(SubCategory::class);
     }
 
     public function questions(): HasMany

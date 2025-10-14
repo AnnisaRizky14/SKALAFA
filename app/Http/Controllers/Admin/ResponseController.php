@@ -8,6 +8,7 @@ use App\Models\Response;
 use App\Models\Faculty;
 use App\Models\Questionnaire;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ResponseController extends Controller
 {
@@ -38,13 +39,37 @@ class ResponseController extends Controller
 
         // Filter by rating range
         if ($request->min_rating || $request->max_rating) {
-            $query->whereHas('answers', function($q) use ($request) {
-                if ($request->min_rating) {
-                    $q->havingRaw('AVG(rating) >= ?', [$request->min_rating]);
-                }
-                if ($request->max_rating) {
-                    $q->havingRaw('AVG(rating) <= ?', [$request->max_rating]);
-                }
+            $having = '1=1';
+            $params = [];
+            if ($request->min_rating) {
+                $having .= ' AND AVG(response_answers.rating) >= ?';
+                $params[] = $request->min_rating;
+            }
+            if ($request->max_rating) {
+                $having .= ' AND AVG(response_answers.rating) <= ?';
+                $params[] = $request->max_rating;
+            }
+
+            $query->whereExists(function ($subQuery) use ($having, $params) {
+                $subQuery->select(DB::raw(1))
+                         ->from('response_answers')
+                         ->whereColumn('response_answers.response_id', 'responses.id')
+                         ->groupBy('response_answers.response_id')
+                         ->havingRaw($having, $params);
+            });
+        }
+
+        // Search functionality
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('id', 'like', '%' . $search . '%')
+                  ->orWhereHas('questionnaire', function($subQ) use ($search) {
+                      $subQ->where('title', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('faculty', function($subQ) use ($search) {
+                      $subQ->where('name', 'like', '%' . $search . '%');
+                  });
             });
         }
 

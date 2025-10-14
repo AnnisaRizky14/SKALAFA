@@ -12,9 +12,26 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class FacultyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $faculties = Faculty::ordered()->paginate(10);
+        $query = Faculty::query();
+
+        // Search functionality
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('short_name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Status filter
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('is_active', $request->status);
+        }
+
+        $faculties = $query->ordered()->paginate(10)->appends($request->query());
         return view('admin.faculties.index', compact('faculties'));
     }
 

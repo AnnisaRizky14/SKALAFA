@@ -16,9 +16,9 @@
             <!-- Search and Filter -->
             <div class="bg-white overflow-hidden shadow-lg rounded-xl mb-6">
                 <div class="p-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <form method="GET" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div class="flex-1 max-w-md">
-                            <form method="GET" class="flex">
+                            <div class="flex">
                                 <input type="text" name="search" value="{{ request('search') }}"
                                        placeholder="Cari kuisioner..."
                                        class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -28,7 +28,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                     </svg>
                                 </button>
-                            </form>
+                            </div>
                         </div>
                         <div class="flex items-center space-x-2">
                             <select name="status" onchange="this.form.submit()"
@@ -47,7 +47,7 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 

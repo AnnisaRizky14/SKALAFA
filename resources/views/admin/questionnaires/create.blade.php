@@ -26,6 +26,20 @@
                             <x-input-error :messages="$errors->get('faculty_id')" class="mt-2" />
                         </div>
 
+                        <!-- Sub Category Selection -->
+                        <div class="mb-6">
+                            <x-input-label for="sub_category_id" :value="__('Kategori Kuisioner')" />
+                            <select id="sub_category_id" name="sub_category_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring-primary">
+                                <option value="">Pilih Kategori (Opsional)</option>
+                                @foreach($subCategories as $subCategory)
+                                    <option value="{{ $subCategory->id }}">
+                                        {{ $subCategory->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('sub_category_id')" class="mt-2" />
+                        </div>
+
                         <!-- Title -->
                         <div class="mb-6">
                             <x-input-label for="title" :value="__('Judul Kuisioner')" />
