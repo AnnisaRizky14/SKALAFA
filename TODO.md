@@ -1,24 +1,21 @@
-# TODO: Implement Admin Dashboard Charts
+# TODO: Aktivasi Button Lihat Analitik
 
-## Steps to Complete
-- [x] Optimize DashboardController queries for better performance and data fetching
-- [x] Add debugging logs in dashboard.blade.php for data passing
-- [x] Enhance error handling and logging in dashboard.js
-- [x] Verify admin dashboard route exists in routes/web.php
-- [x] Test charts rendering after changes
+## Tugas Utama
+- [x] Implementasi method `index` di `AnalyticsController` untuk mengambil data analitik
+- [x] Buat view `resources/views/admin/analytics/index.blade.php` untuk menampilkan analitik
+- [x] Test fungsionalitas button dengan menjalankan server dan navigasi ke halaman
 
-## Progress
-- Started: [Current Date/Time]
-- Status: Completed
+## Detail Implementasi
+- [x] Ambil data: jumlah respon, rating rata-rata, statistik per fakultas
+- [x] Gunakan model Response, Faculty, Questionnaire untuk mengumpulkan data
+- [x] Tampilkan chart dan statistik di view
+- [x] Perbaiki rating rata-rata agar sama dengan dashboard
+- [x] Perbaiki icon kuisioner aktif
 
-# TODO: Create Thank You Page for Complaint Submission
-
-## Steps to Complete
-- [x] Create thank-you view for complaints (resources/views/complaints/thank-you.blade.php)
-- [x] Add route for complaints.thank-you in routes/web.php
-- [x] Add thankYou method in ComplaintController
-- [x] Update store method to redirect to thank-you page instead of index
-
-## Progress
-- Started: [Current Date/Time]
-- Status: Completed
+## Status
+- [x] Analisis file dan rencana dibuat
+- [x] Konfirmasi dari user diterima
+- [x] Controller diimplementasi
+- [x] View dibuat
+- [x] Perbaikan rating rata-rata selesai
+- [x] Perbaikan icon kuisioner aktif selesai

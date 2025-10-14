@@ -31,12 +31,17 @@
                             </form>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <select name="role" onchange="this.form.submit()"
-                                    class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Semua Role</option>
-                                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
-                            </select>
+                            <form method="GET" class="flex items-center space-x-2">
+                                @if(request('search'))
+                                    <input type="hidden" name="search" value="{{ request('search') }}">
+                                @endif
+                                <select name="role" onchange="this.form.submit()"
+                                        class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Semua Role</option>
+                                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+                                </select>
+                            </form>
                         </div>
                     </div>
                 </div>

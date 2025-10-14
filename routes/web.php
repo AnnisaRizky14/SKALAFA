@@ -48,33 +48,31 @@ Route::get('/complaints/thank-you', [ComplaintController::class, 'thankYou'])->n
 // routes/web.php
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Response Management - Export route must be before resource to avoid conflict
+    Route::get('responses/export', [ResponseController::class, 'export'])->name('responses.export');
+    Route::resource('responses', ResponseController::class);
+    Route::post('responses/bulk-delete', [ResponseController::class, 'bulkDelete'])->name('responses.bulk-delete');
+
     Route::resource('faculties', FacultyController::class);
     Route::resource('questionnaires', QuestionnaireController::class);
-    Route::resource('responses', ResponseController::class);
-    
+
     // Faculty Management
     Route::resource('faculties', FacultyController::class);
-    
+
     // Questionnaire Management
     Route::resource('questionnaires', QuestionnaireController::class);
     Route::post('questionnaires/{questionnaire}/toggle-status', [QuestionnaireController::class, 'toggleStatus'])
         ->name('questionnaires.toggle-status');
     Route::get('questionnaires/{questionnaire}/preview', [QuestionnaireController::class, 'preview'])
         ->name('questionnaires.preview');
-    
+
     // Question Management
     Route::resource('questions', QuestionController::class);
     Route::post('questions/bulk-import', [QuestionController::class, 'bulkImport'])
         ->name('questions.bulk-import');
     Route::post('questions/reorder', [QuestionController::class, 'reorder'])
         ->name('questions.reorder');
-    
-    // Response Management
-    Route::get('responses', [ResponseController::class, 'index'])->name('responses.index');
-    Route::get('responses/{response}', [ResponseController::class, 'show'])->name('responses.show');
-    Route::delete('responses/{response}', [ResponseController::class, 'destroy'])->name('responses.destroy');
-    Route::post('responses/bulk-delete', [ResponseController::class, 'bulkDelete'])->name('responses.bulk-delete');
-    Route::get('responses/export', [ResponseController::class, 'export'])->name('responses.export');
     
     // Analytics & Reports
     Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');

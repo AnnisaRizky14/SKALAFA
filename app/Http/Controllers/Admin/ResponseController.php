@@ -9,6 +9,8 @@ use App\Models\Faculty;
 use App\Models\Questionnaire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\ResponsesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ResponseController extends Controller
 {
@@ -119,26 +121,9 @@ class ResponseController extends Controller
 
     public function export(Request $request)
     {
-        // This would implement Excel/PDF export
-        // For now, return JSON data
-        $responses = Response::with(['questionnaire', 'faculty', 'answers.question'])
-            ->completed()
-            ->get();
+        $filename = 'responses_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
 
-        $data = $responses->map(function($response) {
-            return [
-                'id' => $response->id,
-                'faculty' => $response->faculty->name,
-                'questionnaire' => $response->questionnaire->title,
-                'completed_at' => $response->completed_at->format('Y-m-d H:i:s'),
-                'average_rating' => $response->getAverageRating(),
-                'satisfaction_level' => $response->getSatisfactionLevel(),
-                'duration_minutes' => $response->getDurationInMinutes(),
-                'total_answers' => $response->answers->count(),
-            ];
-        });
-
-        return response()->json($data);
+        return Excel::download(new ResponsesExport($request), $filename);
     }
 
     public function statistics()
