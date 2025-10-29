@@ -41,16 +41,14 @@
         <!-- Faculty Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
             @foreach($faculties as $faculty)
-            <div class="faculty-card bg-white rounded-xl shadow-lg overflow-hidden card-hover cursor-pointer transform transition-all duration-300"
-                 onclick="selectFaculty('{{ $faculty->id }}')"
-                 data-faculty-id="{{ $faculty->id }}">
-                
+            <div class="faculty-card bg-white rounded-xl shadow-lg overflow-hidden card-hover transform transition-all duration-300">
+
                 <!-- Faculty Header -->
                 <div class="h-32 flex items-center justify-center text-white text-3xl font-bold relative overflow-hidden"
                      style="background: linear-gradient(135deg, {{ $faculty->color }}, {{ \App\Helpers\ColorHelper::adjustColor($faculty->color, -20) }})">
                     <div class="absolute inset-0 bg-black opacity-10"></div>
                     <span class="relative z-10">{{ $faculty->short_name }}</span>
-                    
+
                     <!-- Background Pattern -->
                     <div class="absolute inset-0 opacity-10">
                         <svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -68,17 +66,17 @@
                 <div class="p-6">
                     <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $faculty->name }}</h3>
                     <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ Str::limit($faculty->description, 100) }}</p>
-                    
+
                     <!-- Statistics -->
                     @php $stats = $faculty->getSatisfactionStats() @endphp
                     <div class="flex items-center justify-between text-sm border-t pt-4">
                         <div class="flex items-center text-gray-500">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.121M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.121M7 20v-2c0-.656.126-1.283.356-1.857M24 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                             {{ $stats['total_responses'] }} responden
                         </div>
-                        
+
                         @if($stats['average_rating'] > 0)
                         <div class="flex items-center">
                             <div class="flex text-yellow-400 mr-1">
@@ -104,14 +102,16 @@
                     <div class="mt-3 text-xs text-gray-500">
                         {{ $questionnaireCount }} kuisioner tersedia
                     </div>
-                </div>
 
-                <!-- Selection Indicator -->
-                <div class="absolute top-4 right-4 w-6 h-6 rounded-full border-2 border-white hidden selection-indicator">
-                    <div class="w-full h-full rounded-full bg-white flex items-center justify-center">
-                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
+                    <!-- Lihat Kuisioner Button -->
+                    <div class="mt-4 text-center">
+                        <a href="/survey/questionnaires/{{ $faculty->id }}"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300">
+                            <span>Lihat Kuisioner</span>
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -131,17 +131,7 @@
         </div>
         @endif
 
-        <!-- Continue Button (Hidden by default) -->
-        <div id="continue-section" class="text-center hidden">
-            <button id="continue-btn" 
-                    class="inline-flex items-center px-8 py-4 btn-primary rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled>
-                <span id="continue-text">Pilih Fakultas Terlebih Dahulu</span>
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
-            </button>
-        </div>
+
     </main>
 
     <!-- Help Section -->
@@ -182,69 +172,5 @@
         </div>
     </section>
 </div>
-
-@push('scripts')
-<script>
-let selectedFacultyId = null;
-
-function selectFaculty(facultyId) {
-    // Remove previous selection
-    document.querySelectorAll('.faculty-card').forEach(card => {
-        card.classList.remove('ring-4', 'ring-blue-500', 'ring-opacity-50');
-        card.querySelector('.selection-indicator').classList.add('hidden');
-    });
-    
-    // Add selection to clicked card
-    const selectedCard = document.querySelector(`[data-faculty-id="${facultyId}"]`);
-    selectedCard.classList.add('ring-4', 'ring-blue-500', 'ring-opacity-50');
-    selectedCard.querySelector('.selection-indicator').classList.remove('hidden');
-    
-    // Update selected faculty
-    selectedFacultyId = facultyId;
-    
-    // Show and enable continue button
-    const continueSection = document.getElementById('continue-section');
-    const continueBtn = document.getElementById('continue-btn');
-    const continueText = document.getElementById('continue-text');
-    
-    continueSection.classList.remove('hidden');
-    continueBtn.disabled = false;
-    continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    continueText.textContent = 'Lanjut ke Kuisioner';
-    
-    // Add click handler
-    continueBtn.onclick = () => {
-        window.location.href = `/survey/questionnaires/${facultyId}`;
-    };
-}
-
-// Animation on scroll
-document.addEventListener('DOMContentLoaded', function() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-
-    // Animate cards with stagger effect
-    document.querySelectorAll('.faculty-card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-        observer.observe(card);
-    });
-});
-
-</script>
-@endpush
-
 
 @endsection

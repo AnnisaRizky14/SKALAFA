@@ -36,6 +36,44 @@
                     </div>
                 </div>
 
+                <!-- Participant Information -->
+                @if($response->participant_info)
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-sm font-semibold text-blue-800 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Informasi Peserta
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        @if(isset($response->participant_info['nama']) && $response->participant_info['nama'])
+                        <div>
+                            <label class="block text-xs font-medium text-blue-700 mb-1">Nama</label>
+                            <p class="text-sm text-blue-900">{{ $response->participant_info['nama'] }}</p>
+                        </div>
+                        @endif
+                        @if(isset($response->participant_info['email']) && $response->participant_info['email'])
+                        <div>
+                            <label class="block text-xs font-medium text-blue-700 mb-1">Email</label>
+                            <p class="text-sm text-blue-900">{{ $response->participant_info['email'] }}</p>
+                        </div>
+                        @endif
+                        @if(isset($response->participant_info['status']) && $response->participant_info['status'])
+                        <div>
+                            <label class="block text-xs font-medium text-blue-700 mb-1">Status</label>
+                            <p class="text-sm text-blue-900">{{ $response->participant_info['status'] }}</p>
+                        </div>
+                        @endif
+                        @if(isset($response->participant_info['fakultas']) && $response->participant_info['fakultas'])
+                        <div>
+                            <label class="block text-xs font-medium text-blue-700 mb-1">Fakultas</label>
+                            <p class="text-sm text-blue-900">{{ \App\Models\Faculty::find($response->participant_info['fakultas'])->name ?? 'Tidak ditemukan' }}</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rating Rata-rata</label>

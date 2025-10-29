@@ -121,9 +121,21 @@ class ResponseController extends Controller
 
     public function export(Request $request)
     {
-        $filename = 'responses_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        $format = $request->get('format', 'excel');
 
-        return Excel::download(new ResponsesExport($request), $filename);
+        switch ($format) {
+            case 'pdf':
+                $export = new \App\Exports\ResponsesPdfExport($request);
+                $filename = 'responses_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+                return $export->generatePdf()->download($filename);
+
+
+
+            case 'excel':
+            default:
+                $filename = 'responses_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                return Excel::download(new ResponsesExport($request), $filename);
+        }
     }
 
     public function statistics()

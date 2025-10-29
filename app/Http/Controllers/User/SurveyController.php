@@ -43,6 +43,38 @@ class SurveyController extends Controller
         return view('survey.questionnaires', compact('faculty', 'questionnaires'));
     }
 
+    public function participantInfo(Questionnaire $questionnaire)
+    {
+        if (!$questionnaire->isAvailable()) {
+            return redirect()->route('survey.faculties')
+                ->with('error', 'Kuisioner tidak tersedia saat ini.');
+        }
+
+        $faculties = Faculty::active()->ordered()->get();
+
+        return view('survey.participant-info', compact('questionnaire', 'faculties'));
+    }
+
+    public function saveParticipantInfo(Request $request, Questionnaire $questionnaire)
+    {
+        if (!$questionnaire->isAvailable()) {
+            return redirect()->route('survey.faculties')
+                ->with('error', 'Kuisioner tidak tersedia saat ini.');
+        }
+
+        $validated = $request->validate([
+            'email' => 'nullable|email|max:255',
+            'nama' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:255',
+            'fakultas' => 'required|exists:faculties,id',
+        ]);
+
+        // Store participant info in session
+        session(['participant_info' => $validated]);
+
+        return redirect()->route('survey.start', $questionnaire);
+    }
+
     public function start(Questionnaire $questionnaire)
     {
         if (!$questionnaire->isAvailable()) {
@@ -68,17 +100,22 @@ class SurveyController extends Controller
         // Create new response if none exists
         if (!$response) {
             $token = Response::generateToken();
+            $participantInfo = session('participant_info', []);
+
             $response = Response::create([
                 'questionnaire_id' => $questionnaire->id,
                 'faculty_id' => $questionnaire->faculty_id,
                 'response_token' => $token,
                 'session_id' => session()->getId(),
+                'participant_info' => $participantInfo,
                 'started_at' => now(),
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
 
             session(['survey_token' => $token]);
+            // Clear participant info from session after saving
+            session()->forget('participant_info');
         }
 
         return view('survey.questions', compact(

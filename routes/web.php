@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [SurveyController::class, 'dashboard'])->name('survey.dashboard');
 Route::get('/survey/faculties', [SurveyController::class, 'faculties'])->name('survey.faculties');
 Route::get('/survey/questionnaires/{faculty}', [SurveyController::class, 'questionnaires'])->name('survey.questionnaires');
+Route::get('/survey/participant-info/{questionnaire}', [SurveyController::class, 'participantInfo'])->name('survey.participant-info');
+Route::post('/survey/participant-info/{questionnaire}', [SurveyController::class, 'saveParticipantInfo'])->name('survey.save-participant-info');
 Route::get('/survey/start/{questionnaire}', [SurveyController::class, 'start'])->name('survey.start');
 Route::post('/survey/submit-answer', [SurveyController::class, 'submitAnswer'])->name('survey.submit-answer');
 Route::post('/survey/submit', [SurveyController::class, 'submit'])->name('survey.submit');

@@ -1,21 +1,10 @@
-# TODO: Aktivasi Button Lihat Analitik
+# TODO: Add Participant Information Collection Page
 
-## Tugas Utama
-- [x] Implementasi method `index` di `AnalyticsController` untuk mengambil data analitik
-- [x] Buat view `resources/views/admin/analytics/index.blade.php` untuk menampilkan analitik
-- [x] Test fungsionalitas button dengan menjalankan server dan navigasi ke halaman
-
-## Detail Implementasi
-- [x] Ambil data: jumlah respon, rating rata-rata, statistik per fakultas
-- [x] Gunakan model Response, Faculty, Questionnaire untuk mengumpulkan data
-- [x] Tampilkan chart dan statistik di view
-- [x] Perbaiki rating rata-rata agar sama dengan dashboard
-- [x] Perbaiki icon kuisioner aktif
-
-## Status
-- [x] Analisis file dan rencana dibuat
-- [x] Konfirmasi dari user diterima
-- [x] Controller diimplementasi
-- [x] View dibuat
-- [x] Perbaikan rating rata-rata selesai
-- [x] Perbaikan icon kuisioner aktif selesai
+## Pending Tasks
+- [ ] Create new routes for GET and POST participant-info
+- [ ] Add participantInfo() and saveParticipantInfo() methods to SurveyController
+- [ ] Create participant-info.blade.php view with form
+- [ ] Update questionnaires.blade.php link to point to participant-info instead of direct start
+- [ ] Modify start() method to save participant_info from session to response
+- [ ] Update admin response show view to display participant info
+- [ ] Test the flow: questionnaire selection -> participant info -> survey start

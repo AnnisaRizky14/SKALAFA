@@ -41,9 +41,7 @@
         <!-- Questionnaire Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             @foreach($questionnaires as $questionnaire)
-            <div class="questionnaire-card bg-white rounded-xl shadow-lg overflow-hidden card-hover cursor-pointer transform transition-all duration-300"
-                 onclick="selectQuestionnaire('{{ $questionnaire->id }}')"
-                 data-questionnaire-id="{{ $questionnaire->id }}">
+            <div class="questionnaire-card bg-white rounded-xl shadow-lg overflow-hidden card-hover transform transition-all duration-300">
 
                 <!-- Questionnaire Header -->
                 <div class="h-32 flex items-center justify-center text-white text-2xl font-bold relative overflow-hidden faculty-bg">
@@ -124,6 +122,17 @@
                         </div>
                     </div>
                     @endif
+
+                    <!-- Mulai Kuisioner Button -->
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('survey.participant-info', $questionnaire) }}"
+                           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300">
+                            <span>Mulai Kuisioner</span>
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Selection Indicator -->
@@ -157,17 +166,7 @@
         </div>
         @endif
 
-        <!-- Continue Button (Hidden by default) -->
-        <div id="continue-section" class="text-center hidden">
-            <button id="continue-btn"
-                    class="inline-flex items-center px-8 py-4 btn-primary rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled>
-                <span id="continue-text">Pilih Kuisioner Terlebih Dahulu</span>
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
-            </button>
-        </div>
+
     </main>
 
     <!-- Help Section -->
@@ -219,39 +218,6 @@
 
 @push('scripts')
 <script>
-let selectedQuestionnaireId = null;
-
-function selectQuestionnaire(questionnaireId) {
-    // Remove previous selection
-    document.querySelectorAll('.questionnaire-card').forEach(card => {
-        card.classList.remove('ring-4', 'ring-blue-500', 'ring-opacity-50');
-        card.querySelector('.selection-indicator').classList.add('hidden');
-    });
-
-    // Add selection to clicked card
-    const selectedCard = document.querySelector(`[data-questionnaire-id="${questionnaireId}"]`);
-    selectedCard.classList.add('ring-4', 'ring-blue-500', 'ring-opacity-50');
-    selectedCard.querySelector('.selection-indicator').classList.remove('hidden');
-
-    // Update selected questionnaire
-    selectedQuestionnaireId = questionnaireId;
-
-    // Show and enable continue button
-    const continueSection = document.getElementById('continue-section');
-    const continueBtn = document.getElementById('continue-btn');
-    const continueText = document.getElementById('continue-text');
-
-    continueSection.classList.remove('hidden');
-    continueBtn.disabled = false;
-    continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    continueText.textContent = 'Mulai Mengisi Kuisioner';
-
-    // Add click handler
-    continueBtn.onclick = () => {
-        window.location.href = `/survey/start/${questionnaireId}`;
-    };
-}
-
 // Animation on scroll
 document.addEventListener('DOMContentLoaded', function() {
     const observerOptions = {
@@ -276,17 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(card);
     });
 });
-
-// Add color adjustment function (simulated)
-function adjustColor(color, percent) {
-    // Simple color adjustment - in real implementation you'd use a proper color manipulation library
-    const num = parseInt(color.replace("#",""), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = (num >> 16) + amt;
-    const B = (num >> 8 & 0x00FF) + amt;
-    const G = (num & 0x0000FF) + amt;
-    return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (B<255?B<1?0:B:255)*0x100 + (G<255?G<1?0:G:255)).toString(16).slice(1);
-}
 </script>
 @endpush
 
