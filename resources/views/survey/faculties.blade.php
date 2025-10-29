@@ -38,6 +38,30 @@
             </p>
         </div>
 
+    <!-- Search Form -->
+    <div class="mb-8">
+        <form method="GET" action="{{ route('survey.faculties') }}" class="max-w-lg mx-auto">
+            <div class="flex items-center shadow-sm">
+                <div class="relative flex-1">
+                    <!-- Input -->
+                    <input type="text"
+                        name="search"
+                        value="{{ $search ?? '' }}"
+                        placeholder="Cari fakultas..."
+                        class="block w-full pl-14 pr-4 py-3 text-sm border border-gray-300 rounded-l-lg bg-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                </div>
+                <!-- Button -->
+                <button type="submit"
+                        class="px-3 py-3 bg-blue-600 text-white font-semibold rounded-r-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-200">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+
         <!-- Faculty Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
             @foreach($faculties as $faculty)

@@ -22,25 +22,47 @@ class SurveyController extends Controller
         return view('survey.dashboard', compact('faculties'));
     }
 
-    public function faculties()
+    public function faculties(Request $request)
     {
-        $faculties = Faculty::active()->ordered()->get();
-        return view('survey.faculties', compact('faculties'));
+        $search = $request->get('search');
+
+        $faculties = Faculty::active()->ordered();
+
+        if ($search) {
+            $faculties = $faculties->where(function ($query) use ($search) {
+                $query->where('name', 'LIKE', '%' . $search . '%')
+                      ->orWhere('description', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $faculties = $faculties->get();
+
+        return view('survey.faculties', compact('faculties', 'search'));
     }
 
-    public function questionnaires(Faculty $faculty)
+    public function questionnaires(Request $request, Faculty $faculty)
     {
+        $search = $request->get('search');
+
         $questionnaires = $faculty->questionnaires()
             ->available()
-            ->with('questions')
-            ->get();
+            ->with('questions');
+
+        if ($search) {
+            $questionnaires = $questionnaires->where(function ($query) use ($search) {
+                $query->where('title', 'LIKE', '%' . $search . '%')
+                      ->orWhere('description', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $questionnaires = $questionnaires->get();
 
         if ($questionnaires->isEmpty()) {
             return redirect()->route('survey.faculties')
                 ->with('error', 'Tidak ada kuisioner yang tersedia untuk fakultas ini saat ini.');
         }
 
-        return view('survey.questionnaires', compact('faculty', 'questionnaires'));
+        return view('survey.questionnaires', compact('faculty', 'questionnaires', 'search'));
     }
 
     public function participantInfo(Questionnaire $questionnaire)
