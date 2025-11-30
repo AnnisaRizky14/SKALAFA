@@ -12,7 +12,7 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('storage/unib-logo.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('unib-logo.png') }}" type="image/x-icon">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/admin/dashboard.js'])
@@ -29,7 +29,7 @@
                     <div class="flex items-center">
                         <!-- Logo -->
                         <div class="flex-shrink-0 flex items-center">
-                            <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10">
+                            <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10">
                             <div class="ml-3">
                                 <div class="text-lg font-bold text-white">SKALAFA</div>
                                 <div class="text-xs text-white">

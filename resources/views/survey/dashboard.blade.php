@@ -9,7 +9,7 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-20 w-auto">
+                    <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-20 w-auto">
                     <div>
                         <h1 class="text-2xl font-bold text-primary">SKALAFA</h1>
                         <p class="text-sm text-gray-600">Survei Kepuasan Layanan Fakultas</p>
@@ -144,7 +144,7 @@
             <!-- Brand -->
             <div class="text-left">
                 <div class="flex items-start mb-4">
-                    <img class="h-14 w-auto" src="{{ asset('storage/unib-logo.png') }}" alt="UNIB Logo">
+                    <img class="h-14 w-auto" src="{{ asset('unib-logo.png') }}" alt="UNIB Logo">
                     <div class="ml-3">
                         <div class="text-white font-bold text-lg">SKALAFA</div>
                         <div class="text-unib-blue-200 text-sm">Universitas Bengkulu</div>
