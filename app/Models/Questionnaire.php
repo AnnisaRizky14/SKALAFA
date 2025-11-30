@@ -125,13 +125,13 @@ class Questionnaire extends Model
             return false;
         }
 
-        $now = Carbon::now()->toDate();
+        $now = Carbon::now();
 
-        if ($this->start_date && $this->start_date > $now) {
+        if ($this->start_date && Carbon::parse($this->start_date)->startOfDay()->gt($now)) {
             return false;
         }
 
-        if ($this->end_date && $this->end_date < $now) {
+        if ($this->end_date && Carbon::parse($this->end_date)->endOfDay()->lt($now)) {
             return false;
         }
 

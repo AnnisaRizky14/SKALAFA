@@ -31,7 +31,8 @@ class SurveyController extends Controller
         if ($search) {
             $faculties = $faculties->where(function ($query) use ($search) {
                 $query->where('name', 'LIKE', '%' . $search . '%')
-                      ->orWhere('description', 'LIKE', '%' . $search . '%');
+                      ->orWhere('description', 'LIKE', '%' . $search . '%')
+                      ->orWhere('short_name', 'LIKE', '%' . $search . '%');
             });
         }
 
@@ -57,9 +58,10 @@ class SurveyController extends Controller
 
         $questionnaires = $questionnaires->get();
 
-        if ($questionnaires->isEmpty()) {
-            return redirect()->route('survey.faculties')
-                ->with('error', 'Tidak ada kuisioner yang tersedia untuk fakultas ini saat ini.');
+        // If search was performed and no results found, redirect back to questionnaires page without search
+        if ($search && $questionnaires->isEmpty()) {
+            return redirect()->route('survey.questionnaires', $faculty)
+                ->with('error', 'Tidak ada kuisioner yang cocok dengan pencarian "' . $search . '".');
         }
 
         return view('survey.questionnaires', compact('faculty', 'questionnaires', 'search'));
@@ -84,12 +86,34 @@ class SurveyController extends Controller
                 ->with('error', 'Kuisioner tidak tersedia saat ini.');
         }
 
-        $validated = $request->validate([
+        $rules = [
             'email' => 'nullable|email|max:255',
             'nama' => 'nullable|string|max:255',
             'status' => 'nullable|string|max:255',
-            'fakultas' => 'required|exists:faculties,id',
-        ]);
+        ];
+
+        // Add conditional validation for nim and nip
+        if ($request->status === 'Mahasiswa') {
+            $rules['nim'] = 'required|string|max:255';
+        } elseif ($request->status === 'Dosen') {
+            $rules['nip'] = 'required|string|max:255';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Check if the email already submitted this questionnaire
+        if (!empty($validated['email'])) {
+            $exists = \App\Models\Response::where('questionnaire_id', $questionnaire->id)
+                ->completed()
+                ->where('participant_info->email', $validated['email'])
+                ->exists();
+
+            if ($exists) {
+                return back()
+                    ->withErrors(['email' => 'Email ini sudah digunakan untuk mengisi survei ini.'])
+                    ->withInput();
+            }
+        }
 
         // Store participant info in session
         session(['participant_info' => $validated]);

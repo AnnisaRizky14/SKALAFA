@@ -32,7 +32,13 @@
                             <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10">
                             <div class="ml-3">
                                 <div class="text-lg font-bold text-white">SKALAFA</div>
-                                <div class="text-xs text-white">Admin Panel</div>
+                                <div class="text-xs text-white">
+                                    @if(auth()->user()->isFacultyAdmin())
+                                        Admin {{ auth()->user()->faculty->short_name }}
+                                    @else
+                                        Admin Panel
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
@@ -58,10 +64,12 @@
                             class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none {{ request()->routeIs('admin.responses.*') ? 'border-white text-white' : 'border-transparent text-white hover:text-primary-200 hover:border-primary-200' }}">
                                 Respon
                             </a>
+                            @if(auth()->user()->isSuperAdmin())
                             <a href="{{ route('admin.users.index') }}"
                             class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none {{ request()->routeIs('admin.users.*') ? 'border-white text-white' : 'border-transparent text-white hover:text-primary-200 hover:border-primary-200' }}">
                                 Kelola User
                             </a>
+                            @endif
                         </div>
                     </div>
 
@@ -113,13 +121,75 @@
                         </x-dropdown>
                     </div>
 
-                    <!-- Mobile menu button -->
-                    <div class="-mr-2 flex items-center sm:hidden">
-                        <button class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                    <!-- Mobile menu button and notification icon -->
+                    <div class="-mr-2 flex items-center sm:hidden space-x-4">
+                        <!-- Notification Dropdown Icon next to Hamburger -->
+                        <div class="flex items-center">
+                            @include('components.notification-dropdown')
+                        </div>
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-primary-200 hover:bg-primary-700 focus:outline-none focus:bg-primary-700 focus:text-primary-200 transition duration-150 ease-in-out">
                             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Navigation Menu -->
+                <div id="mobile-menu" class="hidden sm:hidden bg-primary-700 border-t border-primary-800">
+                    <div class="px-2 pt-2 pb-3 space-y-1">
+                        <a href="{{ route('admin.dashboard') }}"
+                           class="block px-3 py-2 text-base font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-primary-800 text-white' : 'text-primary-200 hover:bg-primary-800 hover:text-white' }} transition duration-150 ease-in-out">
+                            Dashboard
+                        </a>
+                        <a href="{{ route('admin.faculties.index') }}"
+                           class="block px-3 py-2 text-base font-medium {{ request()->routeIs('admin.faculties.*') ? 'bg-primary-800 text-white' : 'text-primary-200 hover:bg-primary-800 hover:text-white' }} transition duration-150 ease-in-out">
+                            Fakultas
+                        </a>
+                        <a href="{{ route('admin.questionnaires.index') }}"
+                           class="block px-3 py-2 text-base font-medium {{ request()->routeIs('admin.questionnaires.*') ? 'bg-primary-800 text-white' : 'text-primary-200 hover:bg-primary-800 hover:text-white' }} transition duration-150 ease-in-out">
+                            Kuisioner
+                        </a>
+                        <a href="{{ route('admin.complaints.index') }}"
+                           class="block px-3 py-2 text-base font-medium {{ request()->routeIs('admin.complaints.*') ? 'bg-primary-800 text-white' : 'text-primary-200 hover:bg-primary-800 hover:text-white' }} transition duration-150 ease-in-out">
+                            Pengaduan
+                        </a>
+                        <a href="{{ route('admin.responses.index') }}"
+                           class="block px-3 py-2 text-base font-medium {{ request()->routeIs('admin.responses.*') ? 'bg-primary-800 text-white' : 'text-primary-200 hover:bg-primary-800 hover:text-white' }} transition duration-150 ease-in-out">
+                            Respon
+                        </a>
+                        @if(auth()->user()->isSuperAdmin())
+                        <a href="{{ route('admin.users.index') }}"
+                           class="block px-3 py-2 text-base font-medium {{ request()->routeIs('admin.users.*') ? 'bg-primary-800 text-white' : 'text-primary-200 hover:bg-primary-800 hover:text-white' }} transition duration-150 ease-in-out">
+                            Kelola User
+                        </a>
+                        @endif
+                        <!-- Notification Dropdown for mobile menu -->
+                        <!--<div class="border-t border-primary-800 mt-2 px-3 py-2">
+                            @include('components.notification-dropdown')
+                        </div>-->
+                    </div>
+
+                    <!-- Mobile User Menu -->
+                    <div class="pt-4 pb-3 border-t border-primary-800">
+                        <div class="px-2">
+                            <div class="flex items-center px-3">
+                                <div class="text-base font-medium text-white">{{ Auth::user()->name }}</div>
+                            </div>
+                            <div class="mt-3 space-y-1">
+                                <a href="{{ route('profile.edit') }}"
+                                   class="block px-3 py-2 text-base font-medium text-primary-200 hover:bg-primary-800 hover:text-white transition duration-150 ease-in-out">
+                                    Profil
+                                </a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                            class="block w-full text-left px-3 py-2 text-base font-medium text-primary-200 hover:bg-primary-800 hover:text-white transition duration-150 ease-in-out">
+                                        Keluar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -201,6 +271,25 @@
             document.getElementById('loading-overlay').classList.add('hidden');
             document.getElementById('loading-overlay').classList.remove('flex');
         }
+
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            }
+        });
     </script>
 
     <!-- Show flash messages as toasts -->
@@ -221,11 +310,9 @@
     @endphp
 
     @if($toastJs)
-        @verbatim
         <script>
             {!! $toastJs !!}
         </script>
-        @endverbatim
     @endif
 </body>
 </html>

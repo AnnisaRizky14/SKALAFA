@@ -40,10 +40,7 @@ class Faculty extends Model
         return $this->hasMany(Questionnaire::class)->where('is_active', true);
     }
 
-    public function getLogoUrlAttribute(): string
-    {
-        return $this->logo ? asset('images/faculties/' . $this->logo) : asset('images/default-faculty.png');
-    }
+
 
     public function scopeActive($query)
     {

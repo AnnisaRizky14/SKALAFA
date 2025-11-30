@@ -64,60 +64,79 @@
 
         <!-- Faculty Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-            @foreach($faculties as $faculty)
-            <div class="faculty-card bg-white rounded-xl shadow-lg overflow-hidden card-hover transform transition-all duration-300">
+    @foreach($faculties as $faculty)
+        <div class="faculty-card bg-white rounded-xl shadow-lg overflow-hidden card-hover transform transition-all duration-300 flex flex-col h-full">
 
-                <!-- Faculty Header -->
-                <div class="h-32 flex items-center justify-center text-white text-3xl font-bold relative overflow-hidden"
-                     style="background: linear-gradient(135deg, {{ $faculty->color }}, {{ \App\Helpers\ColorHelper::adjustColor($faculty->color, -20) }})">
-                    <div class="absolute inset-0 bg-black opacity-10"></div>
-                    <span class="relative z-10">{{ $faculty->short_name }}</span>
-
-                    <!-- Background Pattern -->
-                    <div class="absolute inset-0 opacity-10">
-                        <svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <pattern id="pattern-{{ $faculty->id }}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                                    <circle cx="10" cy="10" r="2" fill="white" opacity="0.3"/>
-                                </pattern>
-                            </defs>
-                            <rect width="100" height="100" fill="url(#pattern-{{ $faculty->id }})"/>
-                        </svg>
-                    </div>
+            <!-- Faculty Header -->
+            <div class="h-32 flex items-center justify-center relative overflow-hidden"
+                 style="background: linear-gradient(135deg, {{ $faculty->color }}, {{ \App\Helpers\ColorHelper::adjustColor($faculty->color, -20) }})">
+                <div class="absolute inset-0 bg-black opacity-10"></div>
+                <div class="text-white text-2xl font-bold relative z-10">
+                    {{ $faculty->short_name }}
                 </div>
 
-                <!-- Faculty Info -->
-                <div class="p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $faculty->name }}</h3>
-                    <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ Str::limit($faculty->description, 100) }}</p>
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 opacity-10">
+                    <svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="pattern-{{ $faculty->id }}" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                                <circle cx="15" cy="15" r="2" fill="white" opacity="0.5"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100" height="100" fill="url(#pattern-{{ $faculty->id }})"/>
+                    </svg>
+                </div>
+            </div>
 
+            <!-- Faculty Info -->
+            <div class="p-6 flex flex-col flex-1">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $faculty->name }}</h3>
+
+                {{-- deskripsi diberi tinggi minimum supaya sejajar --}}
+                <p class="text-sm text-gray-600 mb-4 leading-relaxed min-h-[56px]">
+                    {{ Str::limit($faculty->description, 100) }}
+                </p>
+
+                @php $stats = $faculty->getSatisfactionStats() @endphp
+
+                <div class="mt-auto">
                     <!-- Statistics -->
-                    @php $stats = $faculty->getSatisfactionStats() @endphp
                     <div class="flex items-center justify-between text-sm border-t pt-4">
                         <div class="flex items-center text-gray-500">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                             {{ $stats['total_responses'] }} responden
                         </div>
 
                         @if($stats['average_rating'] > 0)
-                        <div class="flex items-center">
-                            <div class="flex text-yellow-400 mr-1">
-                                @for($i = 1; $i <= 5; $i++)
-                                    @if($i <= floor($stats['average_rating']))
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="w-3 h-3 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                    @endif
-                                @endfor
+                            <div class="flex items-center">
+                                <div class="flex text-yellow-400 mr-1">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= floor($stats['average_rating']))
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0
+                                                00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0
+                                                00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1
+                                                1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1
+                                                1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0
+                                                00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="w-3 h-3 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0
+                                                00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0
+                                                00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1
+                                                1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1
+                                                1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0
+                                                00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                        @endif
+                                    @endfor
+                                </div>
+                                <span class="text-xs text-gray-600">{{ $stats['average_rating'] }}</span>
                             </div>
-                            <span class="text-xs text-gray-600">{{ $stats['average_rating'] }}</span>
-                        </div>
                         @endif
                     </div>
 
@@ -133,14 +152,17 @@
                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300">
                             <span>Lihat Kuisioner</span>
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                             </svg>
                         </a>
                     </div>
                 </div>
             </div>
-            @endforeach
         </div>
+    @endforeach
+</div>
+
 
         <!-- No Faculty Available Message -->
         @if($faculties->isEmpty())
@@ -162,7 +184,7 @@
     <section class="bg-white py-12 border-t">
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
-                <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">Butuh Bantuan?</h3>
+                <h3 class="text-2xl font-bold text-center text-gray-800 mb-8">Panduan Pelaksanaan Survei</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="text-center p-6">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">

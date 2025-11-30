@@ -18,7 +18,8 @@ class ResponseController extends Controller
     {
         $query = Response::with(['questionnaire', 'faculty', 'answers.question'])
             ->completed()
-            ->latest();
+            ->latest()
+            ->whereIn('faculty_id', auth()->user()->getAccessibleFacultyIds());
 
         // Filter by faculty
         if ($request->faculty_id) {
@@ -78,8 +79,8 @@ class ResponseController extends Controller
         $responses = $query->paginate(20);
         
         // For filter dropdowns
-        $faculties = Faculty::active()->ordered()->get();
-        $questionnaires = Questionnaire::active()->with('faculty')->get();
+        $faculties = Faculty::active()->ordered()->whereIn('id', auth()->user()->getAccessibleFacultyIds())->get();
+        $questionnaires = Questionnaire::active()->with('faculty')->whereIn('faculty_id', auth()->user()->getAccessibleFacultyIds())->get();
 
         return view('admin.responses.index', compact('responses', 'faculties', 'questionnaires'));
     }

@@ -21,12 +21,18 @@ class ComplaintController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'nama_lengkap' => 'required|string|max:255',
             'description' => 'required|string',
-            'email' => 'nullable|email',
+            'email' => 'required|email',
+            'category' => 'required|in:Infrastruktur,Layanan,Akademik,Fasilitas,Sumber Daya Manusia',
         ]);
 
-        Complaint::create($request->all());
+        Complaint::create([
+            'nama_lengkap' => $request->nama_lengkap,
+            'description' => $request->description,
+            'email' => $request->email,
+            'category' => $request->category,
+        ]);
 
         return redirect()->route('complaints.thank-you');
     }

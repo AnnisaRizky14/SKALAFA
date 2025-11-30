@@ -10,8 +10,27 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Notification::latest()->paginate(20);
-        $unreadCount = Notification::unread()->count();
+        $user = auth()->user();
+
+        // Base query
+        $query = Notification::latest();
+
+        // Filter notifications based on user role
+        if ($user->isFacultyAdmin()) {
+            // Faculty admin: only show notifications related to their faculty
+            $accessibleFacultyIds = $user->getAccessibleFacultyIds();
+            $query->forFaculties($accessibleFacultyIds);
+        }
+        // Super admin: no filtering, sees all notifications
+
+        $notifications = $query->paginate(20);
+
+        // Unread count with same filtering
+        $unreadQuery = Notification::unread();
+        if ($user->isFacultyAdmin()) {
+            $unreadQuery->forFaculties($user->getAccessibleFacultyIds());
+        }
+        $unreadCount = $unreadQuery->count();
 
         return view('admin.notifications.index', compact('notifications', 'unreadCount'));
     }

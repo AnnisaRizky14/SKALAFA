@@ -8,12 +8,19 @@ use App\Models\Faculty;
 use App\Models\Questionnaire;
 use App\Models\SubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class QuestionnaireController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
         $query = Questionnaire::with(['faculty', 'subCategory', 'questions', 'responses']);
+
+        // Filter by accessible faculties for faculty admin
+        if ($user->isFacultyAdmin()) {
+            $query->whereIn('faculty_id', $user->getAccessibleFacultyIds());
+        }
 
         // Search functionality
         if ($request->filled('search')) {
@@ -47,13 +54,25 @@ class QuestionnaireController extends Controller
 
     public function create()
     {
-        $faculties = Faculty::active()->ordered()->get();
+        $user = auth()->user();
+        
+        // Get faculties based on user access
+        if ($user->isSuperAdmin()) {
+            $faculties = Faculty::active()->ordered()->get();
+        } else {
+            $faculties = Faculty::active()->ordered()
+                ->whereIn('id', $user->getAccessibleFacultyIds())
+                ->get();
+        }
+        
         $subCategories = SubCategory::active()->ordered()->get();
         return view('admin.questionnaires.create', compact('faculties', 'subCategories'));
     }
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+        
         $validated = $request->validate([
             'faculty_id' => 'required|exists:faculties,id',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
@@ -65,6 +84,13 @@ class QuestionnaireController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after:start_date',
         ]);
+
+        // Check if faculty admin is trying to create for their faculty
+        if ($user->isFacultyAdmin() && !$user->canAccessFaculty($validated['faculty_id'])) {
+            return redirect()->back()
+                ->withErrors(['faculty_id' => 'Anda tidak memiliki akses ke fakultas ini.'])
+                ->withInput();
+        }
 
         Questionnaire::create($validated);
 
@@ -81,13 +107,35 @@ class QuestionnaireController extends Controller
 
     public function edit(Questionnaire $questionnaire)
     {
-        $faculties = Faculty::active()->ordered()->get();
+        $user = auth()->user();
+        
+        // Check if faculty admin can access this questionnaire
+        if ($user->isFacultyAdmin() && !$user->canAccessFaculty($questionnaire->faculty_id)) {
+            abort(403, 'Anda tidak memiliki akses ke kuisioner ini.');
+        }
+        
+        // Get faculties based on user access
+        if ($user->isSuperAdmin()) {
+            $faculties = Faculty::active()->ordered()->get();
+        } else {
+            $faculties = Faculty::active()->ordered()
+                ->whereIn('id', $user->getAccessibleFacultyIds())
+                ->get();
+        }
+        
         $subCategories = SubCategory::active()->ordered()->get();
         return view('admin.questionnaires.edit', compact('questionnaire', 'faculties', 'subCategories'));
     }
 
     public function update(Request $request, Questionnaire $questionnaire)
     {
+        $user = auth()->user();
+        
+        // Check if faculty admin can access this questionnaire
+        if ($user->isFacultyAdmin() && !$user->canAccessFaculty($questionnaire->faculty_id)) {
+            abort(403, 'Anda tidak memiliki akses ke kuisioner ini.');
+        }
+        
         $validated = $request->validate([
             'faculty_id' => 'required|exists:faculties,id',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
@@ -100,6 +148,13 @@ class QuestionnaireController extends Controller
             'end_date' => 'nullable|date|after:start_date',
         ]);
 
+        // Check if faculty admin is trying to change to different faculty
+        if ($user->isFacultyAdmin() && !$user->canAccessFaculty($validated['faculty_id'])) {
+            return redirect()->back()
+                ->withErrors(['faculty_id' => 'Anda tidak memiliki akses ke fakultas ini.'])
+                ->withInput();
+        }
+
         $questionnaire->update($validated);
 
         return redirect()->route('admin.questionnaires.index')
@@ -108,10 +163,20 @@ class QuestionnaireController extends Controller
 
     public function destroy(Questionnaire $questionnaire)
     {
+        $user = auth()->user();
+        
+        // Check if faculty admin can access this questionnaire
+        if ($user->isFacultyAdmin() && !$user->canAccessFaculty($questionnaire->faculty_id)) {
+            abort(403, 'Anda tidak memiliki akses ke kuisioner ini.');
+        }
+        
         if ($questionnaire->responses()->exists()) {
             return redirect()->route('admin.questionnaires.index')
                 ->with('error', 'Kuisioner tidak dapat dihapus karena sudah ada respon.');
         }
+
+        // Create notification before deletion
+        \App\Models\Notification::createQuestionnaireDeletionNotification($questionnaire);
 
         $questionnaire->delete();
 
@@ -119,17 +184,44 @@ class QuestionnaireController extends Controller
             ->with('success', 'Kuisioner berhasil dihapus.');
     }
 
-    public function toggleStatus(Questionnaire $questionnaire)
-    {
-        $questionnaire->update([
-            'is_active' => !$questionnaire->is_active
-        ]);
+    public function toggleStatus(Request $request, \App\Models\Questionnaire $questionnaire)
+{
+    try {
+        // balikkan status aktif
+        $questionnaire->is_active = ! $questionnaire->is_active;
+        $questionnaire->save();
 
-        $status = $questionnaire->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        
-        return redirect()->back()
-            ->with('success', "Kuisioner berhasil {$status}.");
+        // hitung teks & class badge
+        if ($questionnaire->is_active) {
+            if ($questionnaire->isAvailable()) {
+                $statusText  = 'Aktif & Tersedia';
+                $statusClass = 'bg-green-100 text-green-800';
+            } else {
+                $statusText  = 'Aktif & Tidak Tersedia';
+                $statusClass = 'bg-yellow-100 text-yellow-800';
+            }
+        } else {
+            $statusText  = 'Tidak Aktif';
+            $statusClass = 'bg-red-100 text-red-800';
+        }
+
+        return response()->json([
+            'success'      => true,
+            'message'      => 'Status kuisioner berhasil diperbarui.',
+            'is_active'    => (bool) $questionnaire->is_active,
+            'status_text'  => $statusText,
+            'status_class' => $statusClass,
+        ]);
+    } catch (\Throwable $e) {
+        // optional: catat error
+        // Log::error('Toggle status gagal', ['error' => $e->getMessage()]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan di server saat mengubah status kuisioner.',
+        ], 500);
     }
+}
 
     public function preview(Questionnaire $questionnaire)
     {

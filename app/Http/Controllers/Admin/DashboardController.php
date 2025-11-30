@@ -15,21 +15,33 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-// Tambahkan di DashboardController jika belum ada
 public function index()
 {
+    $user = auth()->user();
+    $accessibleFacultyIds = $user->getAccessibleFacultyIds();
+    
+    // Build queries with faculty filtering
+    $responsesQuery = Response::completed();
+    $questionnairesQuery = Questionnaire::active();
+    
+    // Apply faculty filter for faculty admins
+    if ($user->isFacultyAdmin()) {
+        $responsesQuery->whereIn('faculty_id', $accessibleFacultyIds);
+        $questionnairesQuery->whereIn('faculty_id', $accessibleFacultyIds);
+    }
+    
     $stats = [
-        'total_responses' => Response::completed()->count(),
-        'responses_this_month' => Response::completed()->thisMonth()->count(),
-        'active_questionnaires' => Questionnaire::active()->count(),
-        'average_satisfaction' => $this->getAverageSatisfaction(),
+        'total_responses' => $responsesQuery->count(),
+        'responses_this_month' => (clone $responsesQuery)->thisMonth()->count(),
+        'active_questionnaires' => $questionnairesQuery->count(),
+        'average_satisfaction' => $this->getAverageSatisfaction($accessibleFacultyIds),
     ];
 
     $chartsData = [
-        'satisfaction_by_faculty' => $this->getSatisfactionByFaculty(),
-        'monthly_responses' => $this->getMonthlyResponses(),
-        'satisfaction_distribution' => $this->getSatisfactionDistribution(),
-        'subcategory_ratings' => $this->getSubcategoryRatings(),
+        'satisfaction_by_faculty' => $this->getSatisfactionByFaculty($accessibleFacultyIds),
+        'monthly_responses' => $this->getMonthlyResponses($accessibleFacultyIds),
+        'satisfaction_distribution' => $this->getSatisfactionDistribution($accessibleFacultyIds),
+        'subcategory_ratings' => $this->getSubcategoryRatings($accessibleFacultyIds),
     ];
 
     // Ensure all keys exist even if empty
@@ -43,11 +55,16 @@ public function index()
         }
     }
 
-    $recentResponses = Response::with(['questionnaire', 'faculty'])
+    $recentResponsesQuery = Response::with(['questionnaire', 'faculty'])
         ->completed()
-        ->latest()
-        ->take(5)
-        ->get();
+        ->latest();
+    
+    // Apply faculty filter for faculty admins
+    if ($user->isFacultyAdmin()) {
+        $recentResponsesQuery->whereIn('faculty_id', $accessibleFacultyIds);
+    }
+    
+    $recentResponses = $recentResponsesQuery->take(5)->get();
 
     $notifications = Notification::latest()
         ->take(10)
@@ -58,15 +75,24 @@ public function index()
     return view('admin.dashboard', compact('stats', 'chartsData', 'recentResponses', 'notifications', 'unreadNotificationsCount'));
 }
 
-    private function getAverageSatisfaction()
+    private function getAverageSatisfaction($accessibleFacultyIds = null)
     {
-        $average = ResponseAnswer::avg('rating');
+        $query = ResponseAnswer::query();
+        
+        // Filter by faculty if provided
+        if ($accessibleFacultyIds !== null && !empty($accessibleFacultyIds)) {
+            $query->whereHas('response', function($q) use ($accessibleFacultyIds) {
+                $q->whereIn('faculty_id', $accessibleFacultyIds);
+            });
+        }
+        
+        $average = $query->avg('rating');
         return round($average ?? 0, 2);
     }
 
-    private function getSatisfactionByFaculty()
+    private function getSatisfactionByFaculty($accessibleFacultyIds = null)
     {
-        $facultiesData = DB::table('faculties')
+        $query = DB::table('faculties')
             ->leftJoin('responses', 'faculties.id', '=', 'responses.faculty_id')
             ->leftJoin('response_answers', 'responses.id', '=', 'response_answers.response_id')
             ->select(
@@ -77,11 +103,20 @@ public function index()
                 DB::raw('COUNT(DISTINCT responses.id) as total_responses'),
                 DB::raw('AVG(response_answers.rating) as average_rating')
             )
-            ->where('responses.is_completed', true)
-            ->whereNotNull('responses.completed_at')
+            ->where(function($q) {
+                $q->where('responses.is_completed', true)
+                  ->whereNotNull('responses.completed_at')
+                  ->orWhereNull('responses.id');
+            })
             ->groupBy('faculties.id', 'faculties.name', 'faculties.short_name', 'faculties.color')
-            ->orderBy('faculties.name')
-            ->get();
+            ->orderBy('faculties.name');
+        
+        // Filter by accessible faculties
+        if ($accessibleFacultyIds !== null && !empty($accessibleFacultyIds)) {
+            $query->whereIn('faculties.id', $accessibleFacultyIds);
+        }
+        
+        $facultiesData = $query->get();
 
         $data = [];
         foreach ($facultiesData as $faculty) {
@@ -93,8 +128,13 @@ public function index()
             ];
         }
 
-        // Add faculties with no responses
-        $allFaculties = Faculty::select('id', 'name', 'short_name', 'color')->get();
+        // Add faculties with no responses (only accessible ones)
+        $allFacultiesQuery = Faculty::select('id', 'name', 'short_name', 'color');
+        if ($accessibleFacultyIds !== null && !empty($accessibleFacultyIds)) {
+            $allFacultiesQuery->whereIn('id', $accessibleFacultyIds);
+        }
+        $allFaculties = $allFacultiesQuery->get();
+        
         $facultyNamesWithData = collect($data)->pluck('faculty')->toArray();
         foreach ($allFaculties as $faculty) {
             if (!in_array($faculty->short_name ?? $faculty->name, $facultyNamesWithData)) {
@@ -110,15 +150,21 @@ public function index()
         return $data;
     }
 
-    private function getMonthlyResponses()
+    private function getMonthlyResponses($accessibleFacultyIds = null)
     {
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
-            $count = Response::completed()
+            $query = Response::completed()
                 ->whereYear('completed_at', $date->year)
-                ->whereMonth('completed_at', $date->month)
-                ->count();
+                ->whereMonth('completed_at', $date->month);
+            
+            // Filter by faculty if provided
+            if ($accessibleFacultyIds !== null && !empty($accessibleFacultyIds)) {
+                $query->whereIn('faculty_id', $accessibleFacultyIds);
+            }
+            
+            $count = $query->count();
 
             $data[] = [
                 'month' => $date->format('M Y'),
@@ -129,10 +175,18 @@ public function index()
         return $data;
     }
 
-    private function getSatisfactionDistribution()
+    private function getSatisfactionDistribution($accessibleFacultyIds = null)
     {
-        $distribution = ResponseAnswer::select('rating', DB::raw('count(*) as count'))
-            ->groupBy('rating')
+        $query = ResponseAnswer::select('rating', DB::raw('count(*) as count'));
+        
+        // Filter by faculty if provided
+        if ($accessibleFacultyIds !== null && !empty($accessibleFacultyIds)) {
+            $query->whereHas('response', function($q) use ($accessibleFacultyIds) {
+                $q->whereIn('faculty_id', $accessibleFacultyIds);
+            });
+        }
+        
+        $distribution = $query->groupBy('rating')
             ->orderBy('rating')
             ->get()
             ->pluck('count', 'rating')
@@ -149,18 +203,30 @@ public function index()
         return $distribution;
     }
 
-    private function getSubcategoryRatings()
+    private function getSubcategoryRatings($accessibleFacultyIds = null)
     {
-        $subcategories = DB::table('sub_categories')
+        $query = DB::table('sub_categories')
             ->leftJoin('questions', 'sub_categories.id', '=', 'questions.sub_category_id')
             ->leftJoin('response_answers', 'questions.id', '=', 'response_answers.question_id')
             ->leftJoin('responses', 'response_answers.response_id', '=', 'responses.id')
             ->select('sub_categories.name', 'sub_categories.order', DB::raw('AVG(response_answers.rating) as average_rating'))
-            ->where('responses.is_completed', true)
-            ->whereNotNull('responses.completed_at')
+            ->where(function($q) {
+                $q->where('responses.is_completed', true)
+                  ->whereNotNull('responses.completed_at')
+                  ->orWhereNull('responses.id');
+            })
             ->groupBy('sub_categories.id', 'sub_categories.name', 'sub_categories.order')
-            ->orderBy('sub_categories.order')
-            ->get();
+            ->orderBy('sub_categories.order');
+        
+        // Filter by faculty if provided
+        if ($accessibleFacultyIds !== null && !empty($accessibleFacultyIds)) {
+            $query->where(function($q) use ($accessibleFacultyIds) {
+                $q->whereIn('responses.faculty_id', $accessibleFacultyIds)
+                  ->orWhereNull('responses.id');
+            });
+        }
+        
+        $subcategories = $query->get();
 
         $data = [];
         foreach ($subcategories as $subcategory) {

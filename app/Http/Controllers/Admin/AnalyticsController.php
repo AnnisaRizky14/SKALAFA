@@ -14,29 +14,59 @@ class AnalyticsController extends Controller
 {
     public function index()
     {
-        // Statistik umum
-        $totalResponses = Response::count();
-        $totalFaculties = Faculty::count();
-        $totalQuestionnaires = Questionnaire::active()->count();
+        $user = auth()->user();
+        $accessibleFacultyIds = $user->getAccessibleFacultyIds();
 
-        // Rating rata-rata keseluruhan (sesuai dengan DashboardController)
-        $averageRating = ResponseAnswer::avg('rating') ?? 0;
+        // Statistik umum - filter berdasarkan faculty yang dapat diakses
+        $totalResponses = Response::whereHas('questionnaire', function ($query) use ($accessibleFacultyIds) {
+            $query->whereIn('faculty_id', $accessibleFacultyIds);
+        })->count();
 
-        // Data untuk chart rating per fakultas
-        $facultyRatings = Faculty::with(['questionnaires.responses.answers'])->get()->map(function ($faculty) {
-            $responses = $faculty->questionnaires->flatMap->responses;
-            $avgRating = $responses->avg(function ($response) {
-                return $response->getAverageRating();
-            });
+        $totalFaculties = Faculty::whereIn('id', $accessibleFacultyIds)->count();
+        $totalQuestionnaires = Questionnaire::active()->whereIn('faculty_id', $accessibleFacultyIds)->count();
 
-            return [
-                'name' => $faculty->name,
-                'rating' => round($avgRating, 1),
-                'responses' => $responses->count(),
-            ];
-        })->filter(function ($faculty) {
-            return $faculty['responses'] > 0;
-        })->values();
+        // Rating rata-rata keseluruhan - filter berdasarkan faculty yang dapat diakses
+        $averageRating = ResponseAnswer::whereHas('response.questionnaire', function ($query) use ($accessibleFacultyIds) {
+            $query->whereIn('faculty_id', $accessibleFacultyIds);
+        })->avg('rating') ?? 0;
+
+        // Data untuk chart rating per kuisioner - hanya kuisioner dari faculty yang dapat diakses
+        $questionnaireRatings = Questionnaire::whereIn('faculty_id', $accessibleFacultyIds)
+            ->with(['responses.answers'])
+            ->get()
+            ->map(function ($questionnaire) {
+                $responses = $questionnaire->responses;
+                $avgRating = $responses->avg(function ($response) {
+                    return $response->getAverageRating();
+                });
+
+                return [
+                    'title' => $questionnaire->title,
+                    'rating' => round($avgRating, 1),
+                    'responses' => $responses->count(),
+                ];
+            })->filter(function ($questionnaire) {
+                return $questionnaire['responses'] > 0;
+            })->values();
+
+        // Data untuk chart rating per fakultas - hanya untuk super admin
+        $facultyRatings = Faculty::whereIn('id', $accessibleFacultyIds)
+            ->with(['questionnaires.responses.answers'])
+            ->get()
+            ->map(function ($faculty) {
+                $responses = $faculty->questionnaires->flatMap->responses;
+                $avgRating = $responses->avg(function ($response) {
+                    return $response->getAverageRating();
+                });
+
+                return [
+                    'name' => $faculty->name,
+                    'rating' => round($avgRating, 1),
+                    'responses' => $responses->count(),
+                ];
+            })->filter(function ($faculty) {
+                return $faculty['responses'] > 0;
+            })->values();
 
         // Distribusi tingkat kepuasan
         $satisfactionLevels = [
@@ -47,8 +77,10 @@ class AnalyticsController extends Controller
             'Sangat Tidak Puas' => 0,
         ];
 
-        // Hitung distribusi kepuasan berdasarkan rating rata-rata per respon
-        foreach (Response::with('answers')->get() as $response) {
+        // Hitung distribusi kepuasan berdasarkan rating rata-rata per respon - filter berdasarkan faculty yang dapat diakses
+        foreach (Response::whereHas('questionnaire', function ($query) use ($accessibleFacultyIds) {
+            $query->whereIn('faculty_id', $accessibleFacultyIds);
+        })->with('answers')->get() as $response) {
             $avgRating = $response->getAverageRating();
             if ($avgRating >= 4.5) {
                 $satisfactionLevels['Sangat Puas']++;
@@ -63,21 +95,24 @@ class AnalyticsController extends Controller
             }
         }
 
-        // Tren respon bulanan (6 bulan terakhir)
+        // Tren respon bulanan (6 bulan terakhir) - filter berdasarkan faculty yang dapat diakses
         $monthlyTrends = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $count = Response::whereYear('completed_at', $date->year)
-                            ->whereMonth('completed_at', $date->month)
-                            ->count();
+            $count = Response::whereHas('questionnaire', function ($query) use ($accessibleFacultyIds) {
+                $query->whereIn('faculty_id', $accessibleFacultyIds);
+            })->whereYear('completed_at', $date->year)
+              ->whereMonth('completed_at', $date->month)
+              ->count();
             $monthlyTrends[] = [
                 'month' => $date->format('M Y'),
                 'count' => $count,
             ];
         }
 
-        // Top questionnaires berdasarkan jumlah respon
-        $topQuestionnaires = Questionnaire::withCount('responses')
+        // Top questionnaires berdasarkan jumlah respon - hanya untuk faculty yang dapat diakses
+        $topQuestionnaires = Questionnaire::whereIn('faculty_id', $accessibleFacultyIds)
+                                        ->withCount('responses')
                                         ->orderBy('responses_count', 'desc')
                                         ->take(5)
                                         ->get();
@@ -87,6 +122,7 @@ class AnalyticsController extends Controller
             'totalFaculties',
             'totalQuestionnaires',
             'averageRating',
+            'questionnaireRatings',
             'facultyRatings',
             'satisfactionLevels',
             'monthlyTrends',
@@ -96,29 +132,59 @@ class AnalyticsController extends Controller
 
     public function export()
     {
-        // Statistik umum
-        $totalResponses = Response::count();
-        $totalFaculties = Faculty::count();
-        $totalQuestionnaires = Questionnaire::active()->count();
+        $user = auth()->user();
+        $accessibleFacultyIds = $user->getAccessibleFacultyIds();
 
-        // Rating rata-rata keseluruhan
-        $averageRating = ResponseAnswer::avg('rating') ?? 0;
+        // Statistik umum - filter berdasarkan faculty yang dapat diakses
+        $totalResponses = Response::whereHas('questionnaire', function ($query) use ($accessibleFacultyIds) {
+            $query->whereIn('faculty_id', $accessibleFacultyIds);
+        })->count();
 
-        // Data untuk chart rating per fakultas
-        $facultyRatings = Faculty::with(['questionnaires.responses.answers'])->get()->map(function ($faculty) {
-            $responses = $faculty->questionnaires->flatMap->responses;
-            $avgRating = $responses->avg(function ($response) {
-                return $response->getAverageRating();
-            });
+        $totalFaculties = Faculty::whereIn('id', $accessibleFacultyIds)->count();
+        $totalQuestionnaires = Questionnaire::active()->whereIn('faculty_id', $accessibleFacultyIds)->count();
 
-            return [
-                'name' => $faculty->name,
-                'rating' => round($avgRating, 1),
-                'responses' => $responses->count(),
-            ];
-        })->filter(function ($faculty) {
-            return $faculty['responses'] > 0;
-        })->values();
+        // Rating rata-rata keseluruhan - filter berdasarkan faculty yang dapat diakses
+        $averageRating = ResponseAnswer::whereHas('response.questionnaire', function ($query) use ($accessibleFacultyIds) {
+            $query->whereIn('faculty_id', $accessibleFacultyIds);
+        })->avg('rating') ?? 0;
+
+        // Data untuk chart rating per kuisioner - hanya kuisioner dari faculty yang dapat diakses
+        $questionnaireRatings = Questionnaire::whereIn('faculty_id', $accessibleFacultyIds)
+            ->with(['responses.answers'])
+            ->get()
+            ->map(function ($questionnaire) {
+                $responses = $questionnaire->responses;
+                $avgRating = $responses->avg(function ($response) {
+                    return $response->getAverageRating();
+                });
+
+                return [
+                    'title' => $questionnaire->title,
+                    'rating' => round($avgRating, 1),
+                    'responses' => $responses->count(),
+                ];
+            })->filter(function ($questionnaire) {
+                return $questionnaire['responses'] > 0;
+            })->values();
+
+        // Data untuk chart rating per fakultas - hanya untuk faculty yang dapat diakses
+        $facultyRatings = Faculty::whereIn('id', $accessibleFacultyIds)
+            ->with(['questionnaires.responses.answers'])
+            ->get()
+            ->map(function ($faculty) {
+                $responses = $faculty->questionnaires->flatMap->responses;
+                $avgRating = $responses->avg(function ($response) {
+                    return $response->getAverageRating();
+                });
+
+                return [
+                    'name' => $faculty->name,
+                    'rating' => round($avgRating, 1),
+                    'responses' => $responses->count(),
+                ];
+            })->filter(function ($faculty) {
+                return $faculty['responses'] > 0;
+            })->values();
 
         // Distribusi tingkat kepuasan
         $satisfactionLevels = [
@@ -129,8 +195,10 @@ class AnalyticsController extends Controller
             'Sangat Tidak Puas' => 0,
         ];
 
-        // Hitung distribusi kepuasan berdasarkan rating rata-rata per respon
-        foreach (Response::with('answers')->get() as $response) {
+        // Hitung distribusi kepuasan berdasarkan rating rata-rata per respon - filter berdasarkan faculty yang dapat diakses
+        foreach (Response::whereHas('questionnaire', function ($query) use ($accessibleFacultyIds) {
+            $query->whereIn('faculty_id', $accessibleFacultyIds);
+        })->with('answers')->get() as $response) {
             $avgRating = $response->getAverageRating();
             if ($avgRating >= 4.5) {
                 $satisfactionLevels['Sangat Puas']++;
@@ -145,21 +213,24 @@ class AnalyticsController extends Controller
             }
         }
 
-        // Tren respon bulanan (6 bulan terakhir)
+        // Tren respon bulanan (6 bulan terakhir) - filter berdasarkan faculty yang dapat diakses
         $monthlyTrends = [];
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $count = Response::whereYear('completed_at', $date->year)
-                            ->whereMonth('completed_at', $date->month)
-                            ->count();
+            $count = Response::whereHas('questionnaire', function ($query) use ($accessibleFacultyIds) {
+                $query->whereIn('faculty_id', $accessibleFacultyIds);
+            })->whereYear('completed_at', $date->year)
+              ->whereMonth('completed_at', $date->month)
+              ->count();
             $monthlyTrends[] = [
                 'month' => $date->format('M Y'),
                 'count' => $count,
             ];
         }
 
-        // Top questionnaires berdasarkan jumlah respon
-        $topQuestionnaires = Questionnaire::withCount('responses')
+        // Top questionnaires berdasarkan jumlah respon - hanya untuk faculty yang dapat diakses
+        $topQuestionnaires = Questionnaire::whereIn('faculty_id', $accessibleFacultyIds)
+                                        ->withCount('responses')
                                         ->orderBy('responses_count', 'desc')
                                         ->take(5)
                                         ->get();
@@ -170,6 +241,7 @@ class AnalyticsController extends Controller
             'totalFaculties' => $totalFaculties,
             'totalQuestionnaires' => $totalQuestionnaires,
             'averageRating' => $averageRating,
+            'questionnaireRatings' => $questionnaireRatings,
             'facultyRatings' => $facultyRatings,
             'satisfactionLevels' => $satisfactionLevels,
             'monthlyTrends' => $monthlyTrends,
@@ -178,6 +250,6 @@ class AnalyticsController extends Controller
 
         $filename = 'laporan_analitik_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
 
-        return Excel::download(new \App\Exports\AnalyticsExport($exportData), $filename);
+        return Excel::download(new \App\Exports\AnalyticsExport($exportData, $user->isSuperAdmin()), $filename);
     }
 }

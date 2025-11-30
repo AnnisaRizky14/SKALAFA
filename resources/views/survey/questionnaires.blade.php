@@ -30,6 +30,7 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-12">
+
         <!-- Page Title -->
         <div class="text-center mb-12">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">Pilih Kuisioner</h2>

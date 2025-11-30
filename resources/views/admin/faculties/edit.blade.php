@@ -91,7 +91,8 @@
                     <!-- Is Active -->
                     <div class="mb-6">
                         <label class="flex items-center">
-                            <input id="is_active" name="is_active" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                            <input type="hidden" name="is_active" value="0">
+                            <input id="is_active" name="is_active" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
                                    {{ old('is_active', $faculty->is_active) ? 'checked' : '' }}>
                             <span class="ml-2 text-sm text-gray-600">Aktifkan fakultas ini</span>
                         </label>

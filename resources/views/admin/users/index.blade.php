@@ -38,8 +38,8 @@
                                 <select name="role" onchange="this.form.submit()"
                                         class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Semua Role</option>
-                                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+                                    <option value="faculty_admin" {{ request('role') == 'faculty_admin' ? 'selected' : '' }}>Admin Fakultas</option>
+                                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Super Admin</option>
                                 </select>
                             </form>
                         </div>
@@ -91,11 +91,11 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($user->role === 'admin')
                                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                                            Admin
+                                            Super Admin
                                         </span>
                                     @else
                                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            User
+                                            Admin Fakultas
                                         </span>
                                     @endif
                                 </td>

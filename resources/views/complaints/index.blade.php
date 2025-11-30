@@ -22,17 +22,23 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-12">
+    <main class="container mx-auto px-4 py-8 md:py-12">
         <div class="max-w-4xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-xl p-8">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-primary mb-4">Pengaduan</h2>
-                    <p class="text-gray-600">Kirimkan pengaduan atau saran Anda untuk membantu kami meningkatkan layanan.</p>
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="text-center mb-6 md:mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">Pengaduan</h2>
+                    <p class="text-gray-600 text-sm md:text-base">Kirimkan pengaduan atau saran Anda untuk membantu kami meningkatkan layanan.</p>
                 </div>
 
-                <div class="text-center">
-                    <a href="{{ route('complaints.create') }}" class="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="text-center flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/" class="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gray-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Kembali ke Dashboard
+                    </a>
+                    <a href="{{ route('complaints.create') }}" class="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-primary text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         Kirim Pengaduan Baru

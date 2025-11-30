@@ -47,12 +47,23 @@
                         </div>
                         </div>
                     @empty
-                        <div class="text-center py-12">
-                            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.868 12.683A17.925 17.925 0 0112 21c7.962 0 12-1.21 12-2.683m-12 2.683a17.925 17.925 0 01-7.132-8.317M12 21c4.411 0 8-4.03 8-9s-3.589-9-8-9-8 4.03-8 9a9.06 9.06 0 001.832 5.445"></path>
-                            </svg>
-                            <p class="text-gray-500 text-lg">Belum ada notifikasi</p>
-                        </div>
+<div class="text-center py-12">
+    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4"
+         xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 24 24"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="2"
+         stroke-linecap="round"
+         stroke-linejoin="round">
+        <path d="M18 8a6 6 0 10-12 0v4l-2 3h16l-2-3V8z" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        <line x1="4" y1="4" x2="20" y2="20" />
+    </svg>
+
+    <p class="text-gray-500 text-lg">Belum ada notifikasi</p>
+</div>
+
                     @endforelse
 
                     @if($notifications->hasPages())

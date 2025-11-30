@@ -14,7 +14,13 @@ class FacultyController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
         $query = Faculty::query();
+
+        // Faculty admin can only see their own faculty
+        if ($user->isFacultyAdmin()) {
+            $query->where('id', $user->faculty_id);
+        }
 
         // Search functionality
         if ($request->has('search') && !empty($request->search)) {
@@ -37,11 +43,25 @@ class FacultyController extends Controller
 
     public function create()
     {
+        $user = auth()->user();
+        
+        // Only super admin can create faculties
+        if ($user->isFacultyAdmin()) {
+            abort(403, 'Anda tidak memiliki akses untuk menambah fakultas.');
+        }
+        
         return view('admin.faculties.create');
     }
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+        
+        // Only super admin can create faculties
+        if ($user->isFacultyAdmin()) {
+            abort(403, 'Anda tidak memiliki akses untuk menambah fakultas.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string|max:50',
@@ -65,6 +85,13 @@ class FacultyController extends Controller
 
     public function show(Faculty $faculty)
     {
+        $user = auth()->user();
+        
+        // Faculty admin can only view their own faculty
+        if ($user->isFacultyAdmin() && $faculty->id !== $user->faculty_id) {
+            abort(403, 'Anda tidak memiliki akses ke fakultas ini.');
+        }
+        
         $stats = $faculty->getSatisfactionStats();
         $questionnaires = $faculty->questionnaires()->with('responses')->paginate(5);
         
@@ -73,11 +100,25 @@ class FacultyController extends Controller
 
     public function edit(Faculty $faculty)
     {
+        $user = auth()->user();
+
+        // Faculty admin can only edit their own faculty
+        if ($user->isFacultyAdmin() && $faculty->id !== $user->faculty_id) {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit fakultas ini.');
+        }
+
         return view('admin.faculties.edit', compact('faculty'));
     }
 
     public function update(Request $request, Faculty $faculty)
     {
+        $user = auth()->user();
+
+        // Faculty admin can only update their own faculty
+        if ($user->isFacultyAdmin() && $faculty->id !== $user->faculty_id) {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit fakultas ini.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string|max:50',
@@ -106,6 +147,13 @@ class FacultyController extends Controller
 
     public function destroy(Faculty $faculty)
     {
+        $user = auth()->user();
+        
+        // Only super admin can delete faculties
+        if ($user->isFacultyAdmin()) {
+            abort(403, 'Anda tidak memiliki akses untuk menghapus fakultas.');
+        }
+        
         // Check if faculty has questionnaires
         if ($faculty->questionnaires()->exists()) {
             return redirect()->route('admin.faculties.index')
