@@ -199,7 +199,7 @@
     <footer class="bg-primary text-white py-8 mt-16">
         <div class="container mx-auto px-4 text-center">
             <div class="flex items-center justify-center mb-4">
-                <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-8 w-8 mr-3">
+                <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-8 w-8 mr-3">
                 <span class="text-lg font-semibold">Universitas Bengkulu</span>
             </div>
             <p class="text-sm opacity-75 mb-2">
