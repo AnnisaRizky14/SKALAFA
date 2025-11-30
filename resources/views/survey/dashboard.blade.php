@@ -52,12 +52,12 @@
                 <div class="bg-white border-2 border-gray-100 rounded-xl p-6 card-hover cursor-pointer" onclick="window.location.href='{{ route('survey.questionnaires', $faculty) }}'">
                     <div class="text-center">
                         <!-- Faculty Icon/Logo -->
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center text-white text-2xl font-bold" style="background-color: {{ $faculty->color }}">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center text-white text-1xl font-bold" style="background-color: {{ $faculty->color }}">
                             {{ $faculty->short_name }}
                         </div>
                         
                         <h4 class="text-lg font-semibold text-gray-800 mb-2">{{ $faculty->name }}</h4>
-                        <p class="text-sm text-gray-600 mb-4">{{ Str::limit($faculty->description, 80) }}</p>
+                        <p class="text-sm text-gray-600 mb-4">{{ $faculty->description }}</p>
                         
                         <!-- Statistics -->
                         @php $stats = $faculty->getSatisfactionStats() @endphp
@@ -137,36 +137,42 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-white py-12 border-t-4 border-primary-600" style="background-color: #003f7f;">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-start gap-8 flex-wrap">
-                <div class="text-left">
-                    <div class="flex items-start mb-4">
-                        <img class="h-14 w-auto" src="{{ asset('storage/unib-logo.png') }}" alt="UNIB Logo">
-                        <div class="ml-3">
-                            <div class="text-white font-bold text-lg">SKALAFA</div>
-                            <div class="text-unib-blue-200 text-sm">Universitas Bengkulu</div>
-                        </div>
-                    </div>
-                    <p class="text-unib-blue-200">
-                        Sistem Informasi Survei Kepuasan Layanan Fakultas Universitas Bengkulu.
-                    </p>
-                </div>
+<footer class="text-white py-12 border-t-4 border-primary-600" style="background-color: #003f7f;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-start gap-8 flex-wrap">
 
-                <div class="text-right">
-                    <h3 class="text-lg font-semibold mb-4">Kontak</h3>
-                    <div class="space-y-2 text-unib-blue-200">
-                        <p><i class="fas fa-map-marker-alt mr-2"></i> Jl. WR Supratman, Bengkulu</p>
-                        <p><i class="fas fa-phone mr-2"></i> (0736) 344087</p>
-                        <p><i class="fas fa-envelope mr-2"></i> sisteminformasi@unib.ac.id</p>
+            <!-- Brand -->
+            <div class="text-left">
+                <div class="flex items-start mb-4">
+                    <img class="h-14 w-auto" src="{{ asset('storage/unib-logo.png') }}" alt="UNIB Logo">
+                    <div class="ml-3">
+                        <div class="text-white font-bold text-lg">SKALAFA</div>
+                        <div class="text-unib-blue-200 text-sm">Universitas Bengkulu</div>
                     </div>
                 </div>
+                <p class="text-unib-blue-200">
+                    Sistem Informasi Survei Kepuasan Layanan Fakultas Universitas Bengkulu.
+                </p>
             </div>
-            <div class="border-t border-unib-blue-700 mt-8 pt-8 text-center text-unib-blue-200">
-                <p>&copy; {{ date('Y') }} Prodi Sistem Informasi Fakultas Teknik Universitas Bengkulu. All rights reserved.</p>
+
+            <!-- Kontak -->
+            <div class="w-full sm:w-auto text-left sm:text-right ml-auto">
+                <h3 class="text-left sm:text-right text-lg font-semibold mb-5">Kontak</h3>
+                <div class="space-y-2 text-unib-blue-200 text-left sm:text-right">
+                    <p><i class="fas fa-map-marker-alt mr-1"></i> Jl. WR Supratman, Bengkulu</p>
+                    <p><i class="fas fa-phone mr-1"></i> (0736) 344087</p>
+                    <p><i class="fas fa-envelope mr-1"></i> sisteminformasi@unib.ac.id</p>
+                </div>
             </div>
+
         </div>
-    </footer>
+
+        <!-- Bottom text -->
+        <div class="border-t border-unib-blue-700 mt-8 pt-8 text-center text-unib-blue-200">
+            <p>&copy; {{ date('Y') }} Prodi Sistem Informasi Fakultas Teknik Universitas Bengkulu. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
 
 @push('scripts')
 <script>

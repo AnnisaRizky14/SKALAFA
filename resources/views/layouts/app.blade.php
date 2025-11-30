@@ -117,7 +117,7 @@
         </header>
     @endif
 
-    <main class="py-6">
+    <main class="py-0">
         @yield('content')
     </main>
 </div>

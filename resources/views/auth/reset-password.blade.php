@@ -6,21 +6,11 @@
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
         <!-- Email Address -->
-<div>
-    <x-input-label for="email" :value="__('Email')" class="text-white" />
-    <x-text-input 
-        id="email"
-        type="email"
-        name="email"
-        :value="old('email', $request->email)"
-        required
-        autofocus
-        autocomplete="username"
-        class="block mt-1 w-full !text-black placeholder-gray-400 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
-    />
-    <x-input-error :messages="$errors->get('email')" class="mt-2" />
-</div>
-
+        <div>
+            <x-input-label for="email" :value="__('Email')" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
 
         <!-- Password -->
         <div class="mt-4">

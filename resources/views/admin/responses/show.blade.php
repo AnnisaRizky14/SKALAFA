@@ -141,18 +141,18 @@
                                     <thead class="bg-gray-50">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pertanyaan</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jawaban</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Komentar</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         @foreach($answersGrouped[$subcategory->id] as $answer)
                                             <tr class="hover:bg-gray-50">
-                                                <td class="px-6 py-4 whitespace-pre-wrap text-sm text-gray-900">
-                                                    {{ $answer->question->question_text }}
+                                                <td class="px-6 py-4 text-sm text-gray-900 leading-relaxed">
+                                                    {!! nl2br(e($answer->question->question_text)) !!}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-pre-wrap text-sm text-gray-900">
-                                                    {{ $answer->answer ?? 'Tidak dijawab' }}
+                                                <td class="px-6 py-4 text-sm text-gray-900 leading-relaxed">
+                                                    {!! nl2br(e($answer->comment ?? 'Tidak ada komentar')) !!}
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     @if($answer->rating)

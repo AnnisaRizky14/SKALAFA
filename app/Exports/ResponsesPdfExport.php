@@ -43,7 +43,8 @@ class ResponsesPdfExport
     {
         $query = Response::with(['questionnaire', 'faculty', 'answers.question'])
             ->completed()
-            ->latest();
+            ->latest()
+            ->whereIn('faculty_id', auth()->user()->getAccessibleFacultyIds());
 
         // Apply same filters as in the controller
         if ($this->request && $this->request->faculty_id) {

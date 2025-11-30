@@ -10,10 +10,12 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 class AnalyticsExport implements WithMultipleSheets
 {
     protected $data;
+    protected $isSuperAdmin;
 
-    public function __construct($data)
+    public function __construct($data, $isSuperAdmin = true)
     {
         $this->data = $data;
+        $this->isSuperAdmin = $isSuperAdmin;
     }
 
     public function sheets(): array
@@ -196,6 +198,41 @@ class TopQuestionnairesSheet implements FromCollection, WithHeadings, WithTitle
                 $questionnaire->title,
                 $questionnaire->faculty->name,
                 $questionnaire->responses_count,
+            ];
+        });
+    }
+}
+
+class QuestionnaireRatingsSheet implements FromCollection, WithHeadings, WithTitle
+{
+    protected $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+    }
+
+    public function title(): string
+    {
+        return 'Rating per Kuisioner';
+    }
+
+    public function headings(): array
+    {
+        return [
+            'Judul Kuisioner',
+            'Rating Rata-rata',
+            'Jumlah Respon',
+        ];
+    }
+
+    public function collection()
+    {
+        return collect($this->data['questionnaireRatings'])->map(function ($questionnaire) {
+            return [
+                $questionnaire['title'],
+                number_format($questionnaire['rating'], 1),
+                $questionnaire['responses'],
             ];
         });
     }

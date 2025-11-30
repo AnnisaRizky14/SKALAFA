@@ -130,6 +130,7 @@
                                     Edit Fakultas
                                 </a>
 
+                                @if(auth()->user()->isSuperAdmin())
                                 <form method="POST" action="{{ route('admin.faculties.destroy', $faculty) }}"
                                       onsubmit="return confirm('Apakah Anda yakin ingin menghapus fakultas ini?')">
                                     @csrf
@@ -139,6 +140,7 @@
                                         Hapus Fakultas
                                     </button>
                                 </form>
+                                @endif
                             </div>
                         </div>
                     </div>

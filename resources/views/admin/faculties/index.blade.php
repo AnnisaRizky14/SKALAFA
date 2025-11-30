@@ -4,15 +4,18 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Kelola Fakultas
             </h2>
+            @if(auth()->user()->isSuperAdmin())
             <a href="{{ route('admin.faculties.create') }}"
                class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200">
                 Tambah Fakultas
             </a>
+            @endif
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-full mx-auto sm:px-6 lg:px-12">
+            @if(!auth()->user()->isFacultyAdmin())
             <!-- Search and Filter -->
             <div class="bg-white overflow-hidden shadow-lg rounded-xl mb-6">
                 <div class="p-6">
@@ -46,6 +49,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- Faculties List -->
             <div class="bg-white overflow-hidden shadow-lg rounded-xl p-6">
@@ -117,29 +121,35 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
                                         <a href="{{ route('admin.faculties.show', $faculty) }}"
-                                           class="text-blue-600 hover:text-blue-900">
+                                           class="text-blue-600 hover:text-blue-900"
+                                           title="Lihat Detail">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                             </svg>
                                         </a>
+                                        @if(auth()->user()->isSuperAdmin() || auth()->user()->isFacultyAdmin())
                                         <a href="{{ route('admin.faculties.edit', $faculty) }}"
-                                           class="text-yellow-600 hover:text-yellow-900">
+                                           class="text-yellow-600 hover:text-yellow-900"
+                                           title="Edit">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
                                         </a>
+                                        @endif
+                                        @if(auth()->user()->isSuperAdmin())
                                         <form method="POST" action="{{ route('admin.faculties.destroy', $faculty) }}"
                                               onsubmit="return confirm('Apakah Anda yakin ingin menghapus fakultas ini?')"
                                               class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">
+                                            <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                 </svg>
                                             </button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -149,8 +159,21 @@
                                     <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                     </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada fakultas</h3>
-                                    <p class="text-gray-500 mb-4">Mulai dengan menambahkan fakultas pertama.</p>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                                        @if(auth()->user()->isFacultyAdmin())
+                                            Tidak ada data fakultas
+                                        @else
+                                            Belum ada fakultas
+                                        @endif
+                                    </h3>
+                                    <p class="text-gray-500 mb-4">
+                                        @if(auth()->user()->isFacultyAdmin())
+                                            Tidak ada data yang dapat ditampilkan.
+                                        @else
+                                            Mulai dengan menambahkan fakultas pertama.
+                                        @endif
+                                    </p>
+                                    @if(auth()->user()->isSuperAdmin())
                                     <a href="{{ route('admin.faculties.create') }}"
                                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,6 +181,7 @@
                                         </svg>
                                         Tambah Fakultas
                                     </a>
+                                    @endif
                                 </td>
                             </tr>
                             @endforelse

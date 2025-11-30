@@ -56,18 +56,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('responses', ResponseController::class);
     Route::post('responses/bulk-delete', [ResponseController::class, 'bulkDelete'])->name('responses.bulk-delete');
 
-    Route::resource('faculties', FacultyController::class);
-    Route::resource('questionnaires', QuestionnaireController::class);
-
     // Faculty Management
     Route::resource('faculties', FacultyController::class);
 
-    // Questionnaire Management
-    Route::resource('questionnaires', QuestionnaireController::class);
+    // Questionnaire Management - Custom routes MUST be before resource routes
+    Route::post('/admin/questionnaires/{questionnaire}/toggle-status',
+    [QuestionnaireController::class, 'toggleStatus']
+)->name('admin.questionnaires.toggle-status');
     Route::post('questionnaires/{questionnaire}/toggle-status', [QuestionnaireController::class, 'toggleStatus'])
         ->name('questionnaires.toggle-status');
     Route::get('questionnaires/{questionnaire}/preview', [QuestionnaireController::class, 'preview'])
         ->name('questionnaires.preview');
+    Route::resource('questionnaires', QuestionnaireController::class);
 
     // Question Management
     Route::resource('questions', QuestionController::class);

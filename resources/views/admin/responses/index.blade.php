@@ -52,6 +52,7 @@
                 <div class="p-6">
                     <form method="GET" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            @if(auth()->user()->isSuperAdmin())
                             <!-- Faculty Filter -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Fakultas</label>
@@ -64,6 +65,7 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @endif
 
                             <!-- Questionnaire Filter -->
                             <div>

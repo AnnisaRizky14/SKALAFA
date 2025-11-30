@@ -77,7 +77,43 @@ class Notification extends Model
         ]);
     }
 
+    public static function createQuestionnaireStatusNotification($questionnaire, $isActivated)
+    {
+        $action = $isActivated ? 'diaktifkan' : 'dinonaktifkan';
+        return static::create([
+            'type' => 'questionnaire_status',
+            'reference_id' => $questionnaire->id,
+            'title' => "Kuisioner {$action}",
+            'message' => "Kuisioner '{$questionnaire->title}' telah {$action} oleh admin.",
+        ]);
+    }
+
+    public static function createQuestionnaireDeletionNotification($questionnaire)
+    {
+        return static::create([
+            'type' => 'questionnaire_deletion',
+            'reference_id' => $questionnaire->id,
+            'title' => 'Kuisioner Dihapus',
+            'message' => "Kuisioner '{$questionnaire->title}' telah dihapus oleh admin.",
+        ]);
+    }
+
     // Relationships
+    public function response()
+    {
+        return $this->belongsTo(Response::class, 'reference_id');
+    }
+
+    public function questionnaire()
+    {
+        return $this->belongsTo(Questionnaire::class, 'reference_id');
+    }
+
+    public function complaint()
+    {
+        return $this->belongsTo(Complaint::class, 'reference_id');
+    }
+
     public function getRelatedModel()
     {
         switch ($this->type) {
@@ -85,8 +121,30 @@ class Notification extends Model
                 return Response::with(['questionnaire', 'faculty'])->find($this->reference_id);
             case 'complaint':
                 return Complaint::find($this->reference_id);
+            case 'questionnaire_status':
+            case 'questionnaire_deletion':
+                return Questionnaire::with('faculty')->find($this->reference_id);
             default:
                 return null;
         }
+    }
+
+    // Scope to filter notifications by accessible faculties
+    public function scopeForFaculties($query, array $facultyIds)
+    {
+        return $query->where(function($q) use ($facultyIds) {
+            $q->where('type', 'survey_response')
+              ->whereHas('response', function($subQ) use ($facultyIds) {
+                  $subQ->whereIn('faculty_id', $facultyIds);
+              })
+              ->orWhere('type', 'questionnaire_status')
+              ->whereHas('questionnaire', function($subQ) use ($facultyIds) {
+                  $subQ->whereIn('faculty_id', $facultyIds);
+              })
+              ->orWhere('type', 'questionnaire_deletion')
+              ->whereHas('questionnaire', function($subQ) use ($facultyIds) {
+                  $subQ->whereIn('faculty_id', $facultyIds);
+              });
+        });
     }
 }
