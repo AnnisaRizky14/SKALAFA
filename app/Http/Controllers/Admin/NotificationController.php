@@ -54,8 +54,15 @@ class NotificationController extends Controller
 
     public function getUnreadCount()
     {
+        $user = auth()->user();
+        $unreadQuery = Notification::unread();
+
+        if ($user->isFacultyAdmin()) {
+            $unreadQuery->forFaculties($user->getAccessibleFacultyIds());
+        }
+
         return response()->json([
-            'count' => Notification::unread()->count()
+            'count' => $unreadQuery->count()
         ]);
     }
 }

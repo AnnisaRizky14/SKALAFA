@@ -1,6 +1,14 @@
 @php
     use App\Models\Notification;
-    $unreadCount = Notification::where('is_read', false)->count();
+    $user = auth()->user();
+    $unreadQuery = Notification::unread();
+
+    if ($user && $user->isFacultyAdmin()) {
+        $accessibleFacultyIds = $user->getAccessibleFacultyIds();
+        $unreadQuery->forFaculties($accessibleFacultyIds);
+    }
+
+    $unreadCount = $unreadQuery->count();
 @endphp
 
 <div class="relative">
