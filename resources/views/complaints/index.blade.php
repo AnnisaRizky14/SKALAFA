@@ -7,7 +7,7 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-20 w-auto">
+                    <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-20 w-auto">
                     <div>
                         <h1 class="text-2xl font-bold text-primary">SKALAFA</h1>
                         <p class="text-sm text-gray-600">Survei Kepuasan Layanan Fakultas</p>

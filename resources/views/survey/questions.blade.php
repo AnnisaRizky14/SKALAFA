@@ -12,7 +12,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
                     </a>
-                    <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
+                    <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
                     <div class="min-w-0 flex-1">
                         <h1 class="text-lg sm:text-xl font-bold text-primary truncate">{{ $questionnaire->title }}</h1>
                         <p class="text-xs sm:text-sm text-gray-600 truncate">{{ $questionnaire->faculty->name }}</p>

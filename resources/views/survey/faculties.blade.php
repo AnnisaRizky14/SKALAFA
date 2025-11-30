@@ -12,7 +12,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
                     </a>
-                    <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10">
+                    <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10">
                     <div>
                         <h1 class="text-xl font-bold text-primary">SKALAFA</h1>
                         <p class="text-sm text-gray-600">Pilih Fakultas</p>

@@ -6,7 +6,7 @@
     <header class="bg-white shadow-sm">
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-center">
-                <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10 mr-3">
+                <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10 mr-3">
                 <div class="text-center">
                     <h1 class="text-xl font-bold text-primary">SKALAFA</h1>
                     <p class="text-sm text-gray-600">Survei Kepuasan Layanan Fakultas</p>
@@ -89,7 +89,7 @@
     <footer class="bg-primary text-white py-8 mt-16">
         <div class="container mx-auto px-4 text-center">
             <div class="flex items-center justify-center mb-4">
-                <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-8 w-8 mr-3">
+                <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-8 w-8 mr-3">
                 <span class="text-lg font-semibold">Universitas Bengkulu</span>
             </div>
             <p class="text-sm opacity-75 mb-2">

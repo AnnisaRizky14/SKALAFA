@@ -6,7 +6,7 @@
     <header class="bg-white shadow-sm">
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-center">
-                <img src="{{ asset('storage/unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10 mr-3">
+                <img src="{{ asset('unib-logo.png') }}" alt="Logo UNIB" class="h-10 w-10 mr-3">
                 <div class="text-center">
                     <h1 class="text-xl font-bold text-primary">SKALAFA</h1>
                     <p class="text-sm text-gray-600">Survei Kepuasan Layanan Fakultas</p>
