@@ -67,12 +67,7 @@
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
-                        <!-- Instructions -->
-                        <div class="mb-6">
-                            <x-input-label for="instructions" :value="__('Instruksi')" />
-                            <textarea id="instructions" name="instructions" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring-primary">{{ old('instructions', $questionnaire->instructions) }}</textarea>
-                            <x-input-error :messages="$errors->get('instructions')" class="mt-2" />
-                        </div>
+                        <!-- Instruksi section removed per request -->
 
                         <!-- Estimated Duration -->
                         <div class="mb-6">
@@ -107,6 +102,82 @@
                             <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
                         </div>
 
+                        {{-- Sub-bab & Pertanyaan (editable) --}}
+                        @php
+                            $subsections = [];
+                            if ($questionnaire->relationLoaded('questions')) {
+                                $grouped = $questionnaire->questions->groupBy('sub_category_id');
+                            } else {
+                                $grouped = $questionnaire->questions()->get()->groupBy('sub_category_id');
+                            }
+                            foreach ($grouped as $subCatId => $qs) {
+                                $subsections[] = [
+                                    'sub_category_id' => $subCatId,
+                                    'questions' => $qs->map(function($q){
+                                        return [
+                                            'question_text' => $q->question_text,
+                                            'order' => $q->order,
+                                            'is_required' => (bool) $q->is_required,
+                                        ];
+                                    })->values()->toArray(),
+                                ];
+                            }
+                        @endphp
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">Sub-bab & Pertanyaan</h3>
+                            <div id="subsections-container">
+                                @foreach($subsections as $i => $sub)
+                                <div class="subsection-item mb-6 p-4 border rounded-lg bg-gray-50" data-subsection="{{ $i }}">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-semibold">Sub-bab {{ $i + 1 }}</h4>
+                                        </div>
+                                        <button type="button" onclick="removeSubsection({{ $i }})" class="text-red-500">Hapus</button>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="block text-sm font-medium text-gray-700">Pilih Sub-kategori</label>
+                                        <select name="subsections[{{ $i }}][sub_category_id]" class="mt-1 block w-full border-gray-300 rounded-md">
+                                            <option value="">-- Pilih Sub-kategori --</option>
+                                            @foreach($subCategories as $sc)
+                                                <option value="{{ $sc->id }}" {{ $sc->id == $sub['sub_category_id'] ? 'selected' : '' }}>{{ $sc->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="questions-container space-y-3" data-subsection="{{ $i }}">
+                                        @foreach($sub['questions'] as $qi => $q)
+                                        <div class="question-item p-3 border rounded-md bg-white" data-question="{{ $qi }}">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-3 mb-2">
+                                                        <span class="text-sm font-bold">Q{{ $qi + 1 }}</span>
+                                                        <label class="flex items-center gap-2">
+                                                            <input type="checkbox" name="subsections[{{ $i }}][questions][{{ $qi }}][is_required]" value="1" {{ $q['is_required'] ? 'checked' : '' }}>
+                                                            <span class="text-sm">Wajib diisi</span>
+                                                        </label>
+                                                    </div>
+                                                    <textarea name="subsections[{{ $i }}][questions][{{ $qi }}][question_text]" rows="2" class="w-full border-gray-300 rounded-md">{{ $q['question_text'] }}</textarea>
+                                                </div>
+                                                <button type="button" onclick="removeQuestion({{ $i }}, {{ $qi }})" class="text-red-500">Hapus</button>
+                                            </div>
+                                            <input type="hidden" name="subsections[{{ $i }}][questions][{{ $qi }}][order]" value="{{ $q['order'] }}">
+                                        </div>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <button type="button" onclick="addQuestion({{ $i }})" class="px-3 py-2 bg-indigo-600 text-white rounded-md">Tambah Pertanyaan</button>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <div class="mt-4">
+                                <button type="button" onclick="addSubsection()" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Tambah Sub-bab</button>
+                            </div>
+                        </div>
+
                         <div class="flex items-center justify-end gap-4">
                             <a href="{{ route('admin.questionnaires.show', $questionnaire) }}" class="text-gray-500 hover:text-gray-700">
                                 {{ __('Batal') }}
@@ -121,3 +192,89 @@
         </div>
     </div>
 </x-admin-layout>
+
+<script>
+    // initialize counters based on existing rendered subsections
+    let subsectionIndex = {!! json_encode(count($subsections)) !!};
+    let questionIndices = {};
+
+    // populate questionIndices from existing DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.subsection-item').forEach(function(el) {
+            const idx = el.dataset.subsection;
+            const qcount = el.querySelectorAll('.question-item').length;
+            questionIndices[idx] = qcount;
+        });
+    });
+
+    function addSubsection() {
+        const container = document.getElementById('subsections-container');
+        const i = subsectionIndex;
+        const html = `
+            <div class="subsection-item mb-6 p-4 border rounded-lg bg-gray-50" data-subsection="${i}">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="font-semibold">Sub-bab ${i + 1}</h4>
+                    </div>
+                    <button type="button" onclick="removeSubsection(${i})" class="text-red-500">Hapus</button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700">Pilih Sub-kategori</label>
+                    <select name="subsections[${i}][sub_category_id]" class="mt-1 block w-full border-gray-300 rounded-md">
+                        <option value="">-- Pilih Sub-kategori --</option>
+                        @foreach($subCategories as $sc)
+                        <option value="{{ $sc->id }}">{{ $sc->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="questions-container space-y-3" data-subsection="${i}"></div>
+
+                <div class="mt-3">
+                    <button type="button" onclick="addQuestion(${i})" class="px-3 py-2 bg-indigo-600 text-white rounded-md">Tambah Pertanyaan</button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+        questionIndices[i] = 0;
+        subsectionIndex++;
+    }
+
+    function addQuestion(subsectionId) {
+        const container = document.querySelector(`.questions-container[data-subsection="${subsectionId}"]`);
+        if (!container) return;
+        if (typeof questionIndices[subsectionId] === 'undefined') questionIndices[subsectionId] = 0;
+        const qidx = questionIndices[subsectionId];
+        const html = `
+            <div class="question-item p-3 border rounded-md bg-white" data-question="${qidx}">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-sm font-bold">Q${qidx + 1}</span>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="subsections[${subsectionId}][questions][${qidx}][is_required]" value="1">
+                                <span class="text-sm">Wajib diisi</span>
+                            </label>
+                        </div>
+                        <textarea name="subsections[${subsectionId}][questions][${qidx}][question_text]" rows="2" class="w-full border-gray-300 rounded-md"></textarea>
+                    </div>
+                    <button type="button" onclick="removeQuestion(${subsectionId}, ${qidx})" class="text-red-500">Hapus</button>
+                </div>
+                <input type="hidden" name="subsections[${subsectionId}][questions][${qidx}][order]" value="${qidx + 1}">
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+        questionIndices[subsectionId]++;
+    }
+
+    function removeSubsection(subsectionId) {
+        const el = document.querySelector(`.subsection-item[data-subsection="${subsectionId}"]`);
+        if (el) el.remove();
+    }
+
+    function removeQuestion(subsectionId, questionId) {
+        const el = document.querySelector(`.questions-container[data-subsection="${subsectionId}"] .question-item[data-question="${questionId}"]`);
+        if (el) el.remove();
+    }
+</script>

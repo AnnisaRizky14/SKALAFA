@@ -67,6 +67,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->name('questionnaires.toggle-status');
     Route::get('questionnaires/{questionnaire}/preview', [QuestionnaireController::class, 'preview'])
         ->name('questionnaires.preview');
+    // Multi-step questionnaire creation: prepare base data then setup subsections/questions
+    Route::post('questionnaires/prepare', [QuestionnaireController::class, 'prepare'])
+        ->name('questionnaires.prepare');
+    Route::get('questionnaires/setup', [QuestionnaireController::class, 'setup'])
+        ->name('questionnaires.setup');
     Route::resource('questionnaires', QuestionnaireController::class);
 
     // Question Management

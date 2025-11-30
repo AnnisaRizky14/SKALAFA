@@ -124,20 +124,9 @@ class FacultyController extends Controller
             'short_name' => 'nullable|string|max:50',
             'description' => 'nullable|string',
             'color' => 'required|string|regex:/^#[0-9A-F]{6}$/i',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'is_active' => 'boolean',
             'order' => 'integer|min:0'
         ]);
-
-        // Handle logo upload
-        if ($request->hasFile('logo')) {
-            // Delete old logo
-            if ($faculty->logo && Storage::exists('public/images/faculties/' . $faculty->logo)) {
-                Storage::delete('public/images/faculties/' . $faculty->logo);
-            }
-            
-            $validated['logo'] = $this->handleLogoUpload($request->file('logo'));
-        }
 
         $faculty->update($validated);
 
@@ -161,8 +150,8 @@ class FacultyController extends Controller
         }
 
         // Delete logo file
-        if ($faculty->logo && Storage::exists('public/images/faculties/' . $faculty->logo)) {
-            Storage::delete('public/images/faculties/' . $faculty->logo);
+        if ($faculty->logo && Storage::exists('images/faculties/' . $faculty->logo)) {
+            Storage::delete('images/faculties/' . $faculty->logo);
         }
 
         $faculty->delete();
@@ -174,7 +163,7 @@ class FacultyController extends Controller
     private function handleLogoUpload($file)
     {
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = 'public/images/faculties/' . $filename;
+        $path = 'images/faculties/' . $filename;
 
         // Resize and optimize image
         $manager = new ImageManager(new Driver());

@@ -18,7 +18,7 @@
     <div class="relative bg-white overflow-hidden">
       <!-- Logo kiri-atas -->
       <div class="absolute top-8 left-8 z-10 flex items-center space-x-4">
-        <img src="{{ asset('unib-logo.png') }}" 
+        <img src="<?php echo e(asset('unib-logo.png')); ?>" 
             alt="UNIB" 
             class="w-16 h-16 object-contain"> <!-- ukuran logo diperbesar -->
         <div class="leading-tight">
@@ -38,7 +38,7 @@
       <!-- Ilustrasi: benar-benar di tengah -->
       <div class="min-h-screen flex items-center justify-center px-6">
         <img
-          src="{{ asset('ilus-unib.svg') }}"
+          src="<?php echo e(asset('ilus-unib.svg')); ?>"
           alt="Gedung UNIB"
           class="w-[200%] max-w-[2300px] min-w-[1220px] object-contain select-none"
         >
@@ -56,24 +56,31 @@
     </p>
    <h1 class="text-white text-5xl font-extrabold mb-10">Masuk</h1>
 
-    @if (session('status'))
-      <div class="mb-4 bg-green-100 text-green-800 text-sm px-4 py-2 rounded-lg">{{ session('status') }}</div>
-    @endif
-    @if (session('error'))
-      <div class="mb-4 bg-red-100 text-red-700 text-sm px-4 py-2 rounded-lg">{{ session('error') }}</div>
-    @endif
+    <?php if(session('status')): ?>
+      <div class="mb-4 bg-green-100 text-green-800 text-sm px-4 py-2 rounded-lg"><?php echo e(session('status')); ?></div>
+    <?php endif; ?>
+    <?php if(session('error')): ?>
+      <div class="mb-4 bg-red-100 text-red-700 text-sm px-4 py-2 rounded-lg"><?php echo e(session('error')); ?></div>
+    <?php endif; ?>
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-5 text-left">
-      @csrf
+    <form method="POST" action="<?php echo e(route('login')); ?>" class="space-y-5 text-left">
+      <?php echo csrf_field(); ?>
 
       <!-- Email -->
       <div>
         <label for="email" class="block text-white/90 text-sm mb-2">Alamat Email</label>
         <input
-          type="email" id="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
+          type="email" id="email" name="email" value="<?php echo e(old('email')); ?>" required autofocus autocomplete="username"
           class="w-full rounded-xl bg-white text-gray-900 px-4 py-3 shadow-sm outline-none border-0 focus:ring-4 focus:ring-white/30"
           placeholder="you@example.com">
-        @error('email') <p class="mt-2 text-sm text-rose-200">{{ $message }}</p> @enderror
+        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="mt-2 text-sm text-rose-200"><?php echo e($message); ?></p> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
       </div>
 
       <!-- Password + toggle -->
@@ -99,7 +106,14 @@
             </svg>
           </button>
         </div>
-        @error('password') <p class="mt-2 text-sm text-rose-200">{{ $message }}</p> @enderror
+        <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="mt-2 text-sm text-rose-200"><?php echo e($message); ?></p> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
       </div>
 
       <!-- Remember + Forgot -->
@@ -107,14 +121,14 @@
         <label for="remember" class="inline-flex items-center text-white/90">
           <input id="remember" name="remember" type="checkbox"
                  class="h-4 w-4 rounded border-white/30 text-white focus:ring-white/30"
-                 {{ old('remember') ? 'checked' : '' }}>
+                 <?php echo e(old('remember') ? 'checked' : ''); ?>>
           <span class="ml-2">Ingat Saya</span>
         </label>
-        @if (Route::has('password.request'))
-          <a href="{{ route('password.request') }}" class="underline text-white/90 hover:text-white">
+        <?php if(Route::has('password.request')): ?>
+          <a href="<?php echo e(route('password.request')); ?>" class="underline text-white/90 hover:text-white">
             Lupa Kata Sandi?
           </a>
-        @endif
+        <?php endif; ?>
       </div>
 
       <!-- Tombol oranye -->
@@ -141,3 +155,4 @@
   </script>
 </body>
 </html>
+<?php /**PATH C:\laragon\www\skalafa-system\resources\views/auth/login.blade.php ENDPATH**/ ?>

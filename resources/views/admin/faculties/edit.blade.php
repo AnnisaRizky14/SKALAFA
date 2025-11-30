@@ -63,30 +63,7 @@
                         <p class="mt-1 text-sm text-gray-500">Pilih warna tema untuk fakultas</p>
                     </div>
 
-                    <!-- Logo -->
-                    <div class="mb-6">
-                        <x-input-label for="logo" value="Logo Fakultas" />
-                        <input id="logo" name="logo" type="file" accept="image/*"
-                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                        <x-input-error :messages="$errors->get('logo')" class="mt-2" />
-                        <p class="mt-1 text-sm text-gray-500">Upload logo fakultas (JPEG, PNG, JPG - maksimal 2MB)</p>
 
-                        <!-- Current Logo Preview -->
-                        @if($faculty->logo)
-                            <div class="mt-3">
-                                <p class="text-sm text-gray-600 mb-2">Logo saat ini:</p>
-                                <img id="current_logo" src="{{ asset('storage/images/faculties/' . $faculty->logo) }}"
-                                     alt="{{ $faculty->name }}"
-                                     class="h-20 w-20 object-cover rounded-lg border border-gray-200">
-                            </div>
-                        @endif
-
-                        <!-- New Logo Preview -->
-                        <div id="logo_preview" class="mt-3 hidden">
-                            <p class="text-sm text-gray-600 mb-2">Logo baru:</p>
-                            <img id="preview_img" src="" alt="Preview" class="h-20 w-20 object-cover rounded-lg border border-gray-200">
-                        </div>
-                    </div>
 
                     <!-- Is Active -->
                     <div class="mb-6">
@@ -133,22 +110,6 @@
             document.getElementById('color').value = this.value;
         });
 
-        // Logo preview
-        document.getElementById('logo').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('logo_preview');
-            const previewImg = document.getElementById('preview_img');
 
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    preview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.classList.add('hidden');
-            }
-        });
     </script>
 </x-admin-layout>

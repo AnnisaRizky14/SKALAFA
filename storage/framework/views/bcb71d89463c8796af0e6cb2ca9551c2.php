@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    <title>@yield('title', config('app.name', 'SKALAFA'))</title>
+    <title><?php echo $__env->yieldContent('title', config('app.name', 'SKALAFA')); ?></title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('unib-logo.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="<?php echo e(asset('unib-logo.png')); ?>" type="image/x-icon">
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     
     <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
@@ -105,20 +105,20 @@
         }
     </style>
 
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body class="font-sans antialiased bg-gray-50">
 <div class="min-h-screen">
-    @hasSection('header')
+    <?php if (! empty(trim($__env->yieldContent('header')))): ?>
         <header class="bg-white shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                @yield('header')
+                <?php echo $__env->yieldContent('header'); ?>
             </div>
         </header>
-    @endif
+    <?php endif; ?>
 
     <main class="py-0">
-        @yield('content')
+        <?php echo $__env->yieldContent('content'); ?>
     </main>
 </div>
 
@@ -136,7 +136,7 @@
     <!-- Scripts -->
     <script>
         // CSRF Token Setup
-        window.csrf_token = '{{ csrf_token() }}';
+        window.csrf_token = '<?php echo e(csrf_token()); ?>';
         
         // Toast Notification Function
         function showToast(message, type = 'success') {
@@ -186,29 +186,29 @@
         
         // Show flash messages as toasts
         /*
-        @if(session('success'))
-            showToast('{{ session('success') }}', 'success');
-        @endif
+        <?php if(session('success')): ?>
+            showToast('<?php echo e(session('success')); ?>', 'success');
+        <?php endif; ?>
         
-        @if(session('error'))
-            showToast('{{ session('error') }}', 'error');
-        @endif
+        <?php if(session('error')): ?>
+            showToast('<?php echo e(session('error')); ?>', 'error');
+        <?php endif; ?>
         
-        @if(session('warning'))
-            showToast('{{ session('warning') }}', 'warning');
-        @endif
+        <?php if(session('warning')): ?>
+            showToast('<?php echo e(session('warning')); ?>', 'warning');
+        <?php endif; ?>
         
-        @if(session('info'))
-            showToast('{{ session('info') }}', 'info');
-        @endif
+        <?php if(session('info')): ?>
+            showToast('<?php echo e(session('info')); ?>', 'info');
+        <?php endif; ?>
         */
     </script>
 
     <div id="flash-messages"
-        data-success="{{ session('success') }}"
-        data-error="{{ session('error') }}"
-        data-warning="{{ session('warning') }}"
-        data-info="{{ session('info') }}">
+        data-success="<?php echo e(session('success')); ?>"
+        data-error="<?php echo e(session('error')); ?>"
+        data-warning="<?php echo e(session('warning')); ?>"
+        data-info="<?php echo e(session('info')); ?>">
     </div>
 
     <script>
@@ -225,6 +225,6 @@
     })();
     </script>
 
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html>
+</html><?php /**PATH C:\laragon\www\skalafa-system\resources\views/layouts/app.blade.php ENDPATH**/ ?>

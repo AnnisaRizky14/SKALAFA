@@ -19,7 +19,7 @@
             <div class="relative bg-white overflow-hidden">
       <!-- Logo kiri-atas -->
       <div class="absolute top-8 left-8 z-10 flex items-center space-x-4">
-        <img src="{{ asset('storage/unib-logo.png') }}" 
+        <img src="{{ asset('unib-logo.png') }}" 
             alt="UNIB" 
             class="w-16 h-16 object-contain"> <!-- ukuran logo diperbesar -->
         <div class="leading-tight">
@@ -39,7 +39,7 @@
       <!-- Ilustrasi: benar-benar di tengah -->
       <div class="min-h-screen flex items-center justify-center px-6">
         <img
-          src="{{ asset('storage/ilus-unib.svg') }}"
+          src="{{ asset('ilus-unib.svg') }}"
           alt="Gedung UNIB"
           class="w-[200%] max-w-[2300px] min-w-[1220px] object-contain select-none"
         >
