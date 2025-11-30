@@ -72,7 +72,7 @@ class QuestionnaireController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         $validated = $request->validate([
             'faculty_id' => 'required|exists:faculties,id',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
@@ -83,6 +83,12 @@ class QuestionnaireController extends Controller
             'is_active' => 'boolean',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after:start_date',
+            'subsections' => 'required|array|min:1',
+            'subsections.*.sub_category_id' => 'required|exists:sub_categories,id',
+            'subsections.*.questions' => 'required|array|min:1',
+            'subsections.*.questions.*.question_text' => 'required|string|max:1000',
+            'subsections.*.questions.*.order' => 'required|integer|min:1',
+            'subsections.*.questions.*.is_required' => 'boolean',
         ]);
 
         // Check if faculty admin is trying to create for their faculty
@@ -92,7 +98,31 @@ class QuestionnaireController extends Controller
                 ->withInput();
         }
 
-        Questionnaire::create($validated);
+        // Create questionnaire
+        $questionnaire = Questionnaire::create([
+            'faculty_id' => $validated['faculty_id'],
+            'sub_category_id' => $validated['sub_category_id'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'instructions' => $validated['instructions'],
+            'estimated_duration' => $validated['estimated_duration'],
+            'is_active' => $validated['is_active'] ?? false,
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+        ]);
+
+        // Create questions for each subsection
+        foreach ($validated['subsections'] as $subsectionData) {
+            foreach ($subsectionData['questions'] as $questionData) {
+                Question::create([
+                    'questionnaire_id' => $questionnaire->id,
+                    'sub_category_id' => $subsectionData['sub_category_id'],
+                    'question_text' => $questionData['question_text'],
+                    'order' => $questionData['order'],
+                    'is_required' => $questionData['is_required'] ?? false,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.questionnaires.index')
             ->with('success', 'Kuisioner berhasil dibuat.');
